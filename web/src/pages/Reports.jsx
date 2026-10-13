@@ -113,7 +113,7 @@ export function ReportView({ print }) {
                 <tr key={b.id} className={b.is_own ? 'bg-accentSoft' : ''}>
                   <td className="td tnum text-muted">{b.rank}</td>
                   <td className="td"><span className="flex items-center gap-2"><BrandDot slot={b.color} /><span className={b.is_own ? 'font-semibold' : ''}>{b.name}</span></span></td>
-                  <td className="td"><div className="flex items-center gap-2"><span className="tnum w-12">{fmtPct(b.visibility)}</span><Bar value={b.visibility} slot={b.color} /></div>{prev && <Delta now={b.visibility} before={prevOf(b.id)?.visibility} />}</td>
+                  <td className="td"><div className="flex items-center gap-2"><span className="tnum w-12">{fmtPct(b.visibility)}</span><Bar value={b.visibility} slot={b.color} /></div>{prev && <Delta now={b.visibility} before={prevOf(b.id)?.visibility} short />}</td>
                   <td className="td tnum">{fmtPos(b.position)}</td><td className="td"><Sentiment value={b.sentiment} /></td><td className="td tnum">{fmtPct(b.sov)}</td>
                 </tr>))}</tbody>
             </table>

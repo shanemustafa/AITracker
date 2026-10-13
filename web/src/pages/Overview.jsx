@@ -110,7 +110,7 @@ function Ranking({ brands, className }) {
                 <td className="td tnum text-muted">{b.rank}</td>
                 <td className="td"><span className="flex items-center gap-2 whitespace-nowrap"><BrandDot slot={b.color} /><span className={b.is_own ? 'font-semibold' : ''}>{b.name}</span></span></td>
                 <td className="td"><span className="tnum">{fmtPct(b.visibility)}</span>
-                  <div><Delta now={b.visibility} before={b.prev?.visibility} /></div></td>
+                  <div><Delta now={b.visibility} before={b.prev?.visibility} short /></div></td>
                 <td className="td tnum">{fmtPos(b.position)}</td>
                 <td className="td"><Sentiment value={b.sentiment} compact /></td>
                 <td className="td tnum">{fmtPct(b.sov)}</td>

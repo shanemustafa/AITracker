@@ -1,7 +1,24 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+// Read-only preview: answers come from a recording embedded in the page (window.__PREVIEW__).
+export const PREVIEW = typeof window !== 'undefined' && !!window.__PREVIEW__;
+function previewAnswer(path, method) {
+  if (method !== 'GET') throw new Error('Read-only preview: changes are switched off here. They work in the real app.');
+  const data = window.__PREVIEW__;
+  const [p, q = ''] = path.split('?');
+  const params = new URLSearchParams(q);
+  const days = params.get('days') || '30';
+  const eng = params.get('engines') || '';
+  const extra = p.endsWith('/chats') ? `&limit=15&offset=${params.get('offset') || 0}` : '';
+  const tries = [path, `${p}?days=${days}${eng && !eng.includes(',') ? `&engines=${eng}` : ''}${extra}`, `${p}?days=${days}${extra}`,
+    `${p}?days=30${extra}`, `${p}?days=30&limit=15&offset=0`, p];
+  for (const t of tries) if (t in data) return structuredClone(data[t]);
+  throw new Error('Not available in the preview.');
+}
+
 export async function api(path, { method = 'GET', body } = {}) {
+  if (PREVIEW) { await new Promise(r => setTimeout(r, 60)); return previewAnswer(path, method); }
   const res = await fetch('/api' + path, {
     method, credentials: 'same-origin',
     headers: body ? { 'Content-Type': 'application/json' } : undefined,

@@ -17,8 +17,8 @@ export const Card = ({ title, subtitle, right, children, className = '', pad = t
   </section>
 );
 
-export function Delta({ now, before, invert = false, unit = 'pts', digits = 1 }) {
-  if (now == null || before == null) return <span className="text-xs text-muted">no earlier data</span>;
+export function Delta({ now, before, invert = false, unit = 'pts', digits = 1, short }) {
+  if (now == null || before == null) return <span className="text-xs text-muted">{short ? '' : 'no earlier data'}</span>;
   const d = Math.round((now - before) * 10 ** digits) / 10 ** digits;
   if (Math.abs(d) < 0.05) return <span className="inline-flex items-center gap-1 text-xs text-muted"><Minus size={12} />no change</span>;
   const better = invert ? d < 0 : d > 0;

@@ -6,3 +6,4 @@ data/backups/
 .env
 *.log
 screenshots/tmp/
+preview/

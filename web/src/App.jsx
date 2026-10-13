@@ -5,7 +5,7 @@ import {
   LayoutDashboard, MessageSquareText, Link2, Users, ListChecks, FileText, Settings, Plus, FolderKanban,
   Sun, Moon, Monitor, LogOut, Play, Loader2, Download, Route as RouteIcon, ClipboardList, Lightbulb, Menu, X,
 } from 'lucide-react';
-import { api, useApi, setTheme, useDark, useFilters, fmtDate } from './lib.js';
+import { api, useApi, setTheme, useDark, useFilters, fmtDate, PREVIEW } from './lib.js';
 import { Spinner, SimBadge, Badge, ErrorBox, useToast, Segmented } from './ui.jsx';
 import { Login, Setup, Invite } from './pages/Auth.jsx';
 import Projects from './pages/Projects.jsx';
@@ -159,6 +159,8 @@ function Shell({ user }) {
         </div>
       )}
       <main className="min-w-0 flex-1 px-4 py-5 md:px-8 md:py-7 print-full">
+        {PREVIEW && <div className="no-print mx-auto mb-4 max-w-[1280px] rounded-lg border border-accent bg-accentSoft px-4 py-2 text-xs text-ink">
+          <strong>Read-only preview.</strong> Click anything to look around. Saving, "Run now", downloads and some filters (country, tag, search) only work in the real app.</div>}
         <div className="mx-auto max-w-[1280px] print-full"><Outlet context={{ reloadProjects: projects.reload }} /></div>
       </main>
     </div>
