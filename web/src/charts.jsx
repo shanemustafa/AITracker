@@ -23,7 +23,7 @@ function TipBox({ active, payload, label, brands, unit = '%', title }) {
   if (!active || !payload?.length) return null;
   const rows = payload.filter(p => p.value != null).sort((a, b) => b.value - a.value);
   return (
-    <div className="rounded-lg border border-line bg-raised px-3 py-2 text-xs shadow-lg">
+    <div className="glass rounded-xl px-3.5 py-2.5 text-xs shadow-lift">
       <div className="mb-1 font-medium text-ink">{title || fmtDate(label)}</div>
       {rows.map(p => {
         const b = brands.find(x => p.dataKey.endsWith('_' + x.id));
@@ -90,9 +90,18 @@ export function ShareOfVoiceChart({ data, brands, hidden = new Set(), height = 2
 export function VisibilitySentimentMap({ brands, height = 280 }) {
   const c = useColors();
   const pts = brands.filter(b => b.visibility != null && b.sentiment != null);
+  // Keep names readable when two dots sit close together: push their labels apart.
+  const labelPlace = {};
+  const sorted = [...pts].sort((a, b) => a.visibility - b.visibility);
+  sorted.forEach((p, i) => {
+    const near = sorted.filter((q, j) => j !== i && Math.abs(q.visibility - p.visibility) < 14 && Math.abs(q.sentiment - p.sentiment) < 12);
+    if (!near.length) return;
+    const leftmost = near.every(q => q.visibility > p.visibility || (q.visibility === p.visibility && q.id > p.id));
+    labelPlace[p.id] = leftmost ? 'left' : near.every(q => q.visibility < p.visibility || q.id < p.id) ? 'right' : (p.sentiment < near[0].sentiment ? 'bottom' : 'top');
+  });
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <ScatterChart margin={{ top: 16, right: 24, bottom: 18, left: -8 }}>
+      <ScatterChart margin={{ top: 16, right: 40, bottom: 18, left: 10 }}>
         <CartesianGrid stroke={c.grid} />
         <XAxis type="number" dataKey="visibility" name="Visibility" unit="%" domain={[0, 100]} tick={{ fill: c.muted, fontSize: 11 }} axisLine={{ stroke: c.axis }} tickLine={false}
           label={{ value: 'Visibility →', position: 'insideBottomRight', offset: -12, fill: c.muted, fontSize: 11 }} />
@@ -102,17 +111,21 @@ export function VisibilitySentimentMap({ brands, height = 280 }) {
         <ReferenceLine y={50} stroke={c.axis} strokeDasharray="4 4" />
         <ReferenceLine x={50} stroke={c.axis} strokeDasharray="4 4" />
         <Tooltip cursor={false} content={({ active, payload }) => active && payload?.[0] ? (
-          <div className="rounded-lg border border-line bg-raised px-3 py-2 text-xs shadow-lg">
+          <div className="glass rounded-xl px-3.5 py-2.5 text-xs shadow-lift">
             <div className="font-medium text-ink mb-1">{payload[0].payload.name}</div>
             <div className="text-ink2">Visibility <span className="tnum text-ink">{payload[0].payload.visibility}%</span></div>
             <div className="text-ink2">Sentiment <span className="tnum text-ink">{payload[0].payload.sentiment}/100</span></div>
           </div>) : null} />
-        <Scatter data={pts} isAnimationActive={false} shape={({ cx, cy, payload }) => (
-          <g>
-            <circle cx={cx} cy={cy} r={6} fill={c.brand(payload.color)} stroke={c.surface} strokeWidth={2} />
-            <text x={cx} y={cy - 11} textAnchor="middle" fill={c.ink} fontSize={11} fontWeight={payload.is_own ? 700 : 500}>{payload.name}</text>
-          </g>
-        )} />
+        <Scatter data={pts} isAnimationActive={false} shape={({ cx, cy, payload }) => {
+          const l = labelPlace[payload.id] || 'top';
+          const pos = { top: [cx, cy - 12, 'middle'], right: [cx + 11, cy + 4, 'start'], left: [cx - 11, cy + 4, 'end'], bottom: [cx, cy + 20, 'middle'] }[l];
+          return (
+            <g>
+              <circle cx={cx} cy={cy} r={6.5} fill={c.brand(payload.color)} stroke={c.surface} strokeWidth={2} />
+              <text x={pos[0]} y={pos[1]} textAnchor={pos[2]} fill={c.ink} fontSize={11} fontWeight={payload.is_own ? 700 : 500}>{payload.name}</text>
+            </g>
+          );
+        }} />
       </ScatterChart>
     </ResponsiveContainer>
   );
@@ -126,7 +139,7 @@ export function HBars({ rows, valueKey = 'value', labelKey = 'label', unit = '%'
         <XAxis type="number" hide domain={[0, 'dataMax']} />
         <YAxis type="category" dataKey={labelKey} width={180} tick={{ fill: c.muted, fontSize: 12 }} axisLine={false} tickLine={false} />
         <Tooltip cursor={{ fill: c.grid, opacity: 0.4 }} content={({ active, payload }) => active && payload?.[0] ? (
-          <div className="rounded-lg border border-line bg-raised px-3 py-2 text-xs shadow-lg"><span className="text-ink">{payload[0].payload[labelKey]}: </span><span className="tnum">{payload[0].value}{unit}</span></div>) : null} />
+          <div className="glass rounded-xl px-3.5 py-2.5 text-xs shadow-lift"><span className="text-ink">{payload[0].payload[labelKey]}: </span><span className="tnum">{payload[0].value}{unit}</span></div>) : null} />
         <RBar dataKey={valueKey} fill={c.brand(slot)} radius={[0, 4, 4, 0]} isAnimationActive={false}>
           <LabelList dataKey={valueKey} position="right" formatter={v => `${v}${unit}`} style={{ fill: c.ink, fontSize: 11 }} />
         </RBar>

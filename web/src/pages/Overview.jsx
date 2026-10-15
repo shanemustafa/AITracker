@@ -28,7 +28,7 @@ export default function Overview() {
     <>
       <FilterBar />
       <div className="mb-4"><SimBanner show={s.simulatedAnswers > 0} /></div>
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat label="Visibility" help="Share of AI answers that mention your brand at all." value={fmtPct(own?.visibility)}
           delta={<Delta now={own?.visibility} before={own?.prev?.visibility} />} sub={`of ${s.totalAnswers} answers`} />
         <Stat label="Position" help="Average rank when you are mentioned. 1 = named first. Lower is better." value={fmtPos(own?.position)}
@@ -42,11 +42,11 @@ export default function Overview() {
 
       {!!sugg.data?.length && <Suggestions list={sugg.data.slice(0, 3)} projectId={project.id} onAdded={reload} />}
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-5">
-        <Trends className="xl:col-span-3" daily={daily.data} />
-        <Ranking className="xl:col-span-2" brands={s.brands} />
+      <div className="mt-5 grid gap-5 xl:grid-cols-12">
+        <Trends className="xl:col-span-7" daily={daily.data} />
+        <Ranking className="xl:col-span-5" brands={s.brands} />
       </div>
-      <div className="mt-4 grid gap-4 xl:grid-cols-5">
+      <div className="mt-5 grid gap-5 xl:grid-cols-5">
         <Card className="xl:col-span-2" title="Visibility vs sentiment" subtitle="Right = mentioned more often. Up = described more positively.">
           <VisibilitySentimentMap brands={s.brands} />
         </Card>
@@ -102,7 +102,7 @@ function Ranking({ brands, className }) {
   return (
     <Card className={className} title="Competitor ranking" subtitle="Sorted by visibility." pad={false}>
       <div className="overflow-x-auto px-2 pb-2">
-        <table className="w-full">
+        <table className="compact w-full">
           <thead><tr><th className="th">#</th><th className="th">Brand</th><th className="th">Visibility</th><th className="th">Pos.</th><th className="th">Sent.</th><th className="th">SoV</th></tr></thead>
           <tbody>
             {rows.map(b => (

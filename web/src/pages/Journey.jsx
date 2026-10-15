@@ -89,7 +89,7 @@ function ProgressChart({ reports, c }) {
             <CartesianGrid vertical={false} stroke={c.grid} />
             <XAxis dataKey="label" tick={{ fill: c.muted, fontSize: 11 }} axisLine={{ stroke: c.axis }} tickLine={false} padding={{ left: 24, right: 24 }} />
             <YAxis unit="%" tick={{ fill: c.muted, fontSize: 11 }} axisLine={false} tickLine={false} domain={[0, 'auto']} />
-            <Tooltip formatter={v => `${v}%`} contentStyle={{ background: 'var(--raised)', border: '1px solid var(--line)', borderRadius: 8, fontSize: 12 }} />
+            <Tooltip formatter={v => `${v}%`} contentStyle={{ background: 'var(--glass)', backdropFilter: 'blur(20px)', border: '1px solid var(--line)', borderRadius: 12, fontSize: 12, boxShadow: '0 18px 48px rgba(0,0,0,0.12)' }} />
             <Line dataKey="visibility" name="Visibility" stroke={c.brand(1)} strokeWidth={2.5} dot={{ r: 4, fill: c.brand(1), stroke: c.surface, strokeWidth: 2 }} isAnimationActive={false}>
               <LabelList dataKey="visibility" position="top" formatter={v => `${v}%`} style={{ fill: c.ink, fontSize: 11 }} />
             </Line>

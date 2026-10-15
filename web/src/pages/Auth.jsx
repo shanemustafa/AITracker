@@ -5,20 +5,19 @@ import { ErrorBox } from '../ui.jsx';
 
 function Frame({ title, subtitle, children }) {
   return (
-    <div className="grid min-h-screen place-items-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent">
-            <svg width="18" height="18" viewBox="0 0 32 32"><path d="M6 23l6-8 5 5 9-12" stroke="white" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+    <div className="relative grid min-h-screen place-items-center overflow-hidden px-4">
+      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full opacity-40 blur-3xl"
+        style={{ background: 'radial-gradient(closest-side, #0a84ff55, #5e5ce633, transparent)' }} />
+      <div className="rise relative w-full max-w-[400px]">
+        <div className="mb-8 flex flex-col items-center text-center">
+          <span className="grid h-14 w-14 place-items-center rounded-[16px] shadow-lift" style={{ background: 'linear-gradient(135deg, #0a84ff, #5e5ce6)' }}>
+            <svg width="28" height="28" viewBox="0 0 32 32"><path d="M6 23l6-8 5 5 9-12" stroke="white" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </span>
-          <span className="font-semibold">AI Answer Tracker</span>
+          <h1 className="mt-6 text-[32px] font-bold leading-tight tracking-display">{title}</h1>
+          {subtitle && <p className="mt-2 text-[15px] text-muted">{subtitle}</p>}
         </div>
-        <div className="card p-6">
-          <h1 className="text-lg font-semibold">{title}</h1>
-          {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
-          <div className="mt-5">{children}</div>
-        </div>
-        <p className="mt-4 text-center text-xs text-muted">Measures what AI assistants say about brands. It does not change it.</p>
+        <div className="card p-7 shadow-lift">{children}</div>
+        <p className="mt-6 text-center text-xs text-muted">AI Answer Tracker measures what AI assistants say about brands.<br />It never tries to change it.</p>
       </div>
     </div>
   );
@@ -42,15 +41,15 @@ function Form({ fields, submit, button }) {
         </div>
       ))}
       <ErrorBox error={err} />
-      <button className="btn-primary mt-1" disabled={busy}>{busy ? 'Please wait…' : button}</button>
+      <button className="btn-primary mt-2 w-full py-3 text-[15px]" disabled={busy}>{busy ? 'Please wait…' : button}</button>
     </form>
   );
 }
 
 export function Login() {
   return (
-    <Frame title="Log in">
-      <Form button="Log in" submit={v => api('/auth/login', { method: 'POST', body: v })} fields={[
+    <Frame title="Sign in" subtitle="Welcome back to AI Answer Tracker.">
+      <Form button="Sign in" submit={v => api('/auth/login', { method: 'POST', body: v })} fields={[
         { name: 'email', label: 'Email', type: 'email', auto: 'email' },
         { name: 'password', label: 'Password', type: 'password', auto: 'current-password' },
       ]} />

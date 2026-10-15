@@ -111,18 +111,18 @@ function Shell({ user }) {
   ] : [];
 
   const sidebar = (
-    <div className="flex h-full flex-col gap-4 p-3">
-      <Link to="/" className="flex items-center gap-2 px-2 pt-1">
-        <span className="grid h-7 w-7 place-items-center rounded-lg bg-accent text-white">
+    <div className="flex h-full flex-col gap-5 px-3 py-5">
+      <Link to="/" className="flex items-center gap-2.5 px-2">
+        <span className="grid h-8 w-8 place-items-center rounded-[10px] text-white shadow-thumb" style={{ background: 'linear-gradient(135deg, #0a84ff, #5e5ce6)' }}>
           <svg width="16" height="16" viewBox="0 0 32 32"><path d="M6 23l6-8 5 5 9-12" stroke="white" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
         </span>
-        <span className="text-sm font-semibold">AI Answer Tracker</span>
+        <span className="text-[15px] font-semibold tracking-title">AI Answer Tracker</span>
       </Link>
-      {meta.mode === 'demo' ? <Link to="/settings" className="mx-1"><Badge tone="warn" className="w-full justify-center py-1">Demo mode — simulated answers</Badge></Link>
-        : <Badge tone="good" className="mx-1 justify-center py-1">Live mode — real AI answers</Badge>}
+      {meta.mode === 'demo' ? <Link to="/settings" className="mx-1"><Badge tone="warn" className="w-full justify-center py-1.5">Demo mode · simulated answers</Badge></Link>
+        : <Badge tone="good" className="mx-1 justify-center py-1.5">Live mode · real AI answers</Badge>}
       <div className="px-1">
         <label className="label" htmlFor="proj">Project</label>
-        <select id="proj" className="input py-1.5" value={pid || ''} onChange={e => e.target.value && nav(`/p/${e.target.value}/journey`)}>
+        <select id="proj" className="input py-2 text-[13px] font-medium" value={pid || ''} onChange={e => e.target.value && nav(`/p/${e.target.value}/journey`)}>
           <option value="">All projects…</option>
           {projects.data?.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
@@ -130,7 +130,7 @@ function Shell({ user }) {
       <nav className="flex flex-col gap-0.5">
         {projectNav.map(n => <NavLink key={n.to} to={n.to} className="navlink"><n.icon size={15} />{n.label}</NavLink>)}
       </nav>
-      <div className="mt-auto flex flex-col gap-0.5 border-t border-line pt-3">
+      <div className="mt-auto flex flex-col gap-0.5 pt-3" style={{ borderTop: '1px solid var(--line)' }}>
         <NavLink to="/" end className="navlink"><FolderKanban size={15} />All projects</NavLink>
         <NavLink to="/new" className="navlink"><Plus size={15} />New project</NavLink>
         <NavLink to="/settings" className="navlink"><Settings size={15} />Settings</NavLink>
@@ -145,21 +145,21 @@ function Shell({ user }) {
 
   return (
     <div className="min-h-screen md:flex">
-      <aside className="no-print hidden md:block w-60 shrink-0 border-r border-line bg-surface sticky top-0 h-screen overflow-y-auto">{sidebar}</aside>
-      <div className="no-print md:hidden flex items-center justify-between border-b border-line bg-surface px-4 py-2.5">
+      <aside className="glass no-print hidden md:block w-64 shrink-0 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)' }}>{sidebar}</aside>
+      <div className="glass no-print md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--line)' }}>
         <span className="text-sm font-semibold">AI Answer Tracker</span>
         <button onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={18} /></button>
       </div>
       {open && (
         <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={() => setOpen(false)}>
-          <aside className="h-full w-72 bg-surface" onClick={e => e.stopPropagation()}>
+          <aside className="relative h-full w-72 bg-surface shadow-lift" onClick={e => e.stopPropagation()}>
             <button className="absolute right-3 top-3" onClick={() => setOpen(false)} aria-label="Close menu"><X size={18} /></button>
             {sidebar}
           </aside>
         </div>
       )}
-      <main className="min-w-0 flex-1 px-4 py-5 md:px-8 md:py-7 print-full">
-        {PREVIEW && <div className="no-print mx-auto mb-4 max-w-[1280px] rounded-lg border border-accent bg-accentSoft px-4 py-2 text-xs text-ink">
+      <main className="min-w-0 flex-1 px-4 py-6 md:px-10 md:py-10 print-full">
+        {PREVIEW && <div className="no-print mx-auto mb-4 max-w-[1280px] rounded-2xl bg-accentSoft px-5 py-3 text-[13px] text-ink">
           <strong>Read-only preview.</strong> Click anything to look around. Saving, "Run now", downloads and some filters (country, tag, search) only work in the real app.</div>}
         <div className="mx-auto max-w-[1280px] print-full"><Outlet context={{ reloadProjects: projects.reload }} /></div>
       </main>
@@ -204,13 +204,13 @@ function ProjectLayout() {
 
   return (
     <ProjectCtx.Provider value={{ project, reload: () => { p.reload(); setVersion(v => v + 1); }, version, running }}>
-      <div className="no-print mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div className="no-print rise mb-7 flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="truncate text-lg font-semibold">{project.name}</h1>
+            <h1 className="truncate text-[22px] md:text-[26px] font-bold tracking-display">{project.name}</h1>
             {project.data_mode === 'live' ? <Badge tone="good">Live data</Badge> : <SimBadge />}
           </div>
-          <p className="text-xs text-muted">
+          <p className="mt-1 text-[13px] text-muted">
             {project.brands.find(b => b.is_own)?.name} vs {project.brands.filter(b => !b.is_own).length} competitors · {project.promptCount} active questions ·
             {' '}last check {project.last_run_at ? fmtDate(project.last_run_at) : 'never'} · runs {({ daily: 'daily', every3: 'every 3 days', weekly: 'weekly', manual: 'only when you press Run' })[project.frequency]}
           </p>
@@ -223,7 +223,7 @@ function ProjectLayout() {
         </div>
       </div>
       {running && runState && (
-        <div className="no-print mb-4 h-1.5 overflow-hidden rounded-full bg-raised border border-line">
+        <div className="no-print mb-5 h-1 overflow-hidden rounded-full bg-fill">
           <div className="h-full bg-accent transition-all" style={{ width: `${runState.total ? (100 * (runState.done + runState.failed)) / runState.total : 5}%` }} />
         </div>
       )}
@@ -247,12 +247,12 @@ function ExportMenu({ id }) {
     <div className="relative">
       <button className="btn-ghost" onClick={() => setOpen(o => !o)} aria-expanded={open}><Download size={15} />Export</button>
       {open && (
-        <div className="absolute right-0 z-30 mt-1 w-60 rounded-xl border border-line bg-raised p-1 shadow-xl" onMouseLeave={() => setOpen(false)}>
+        <div className="glass rise absolute right-0 z-30 mt-2 w-64 rounded-2xl p-1.5 shadow-lift" style={{ border: '1px solid var(--line)' }} onMouseLeave={() => setOpen(false)}>
           {items.map(([k, label]) => (
-            <a key={k} className="block rounded-lg px-3 py-2 text-sm hover:bg-surface" href={`/api/projects/${id}/export/${k}?${qs}`} onClick={() => setOpen(false)}>{label}</a>
+            <a key={k} className="block rounded-xl px-3 py-2 text-[13px] hover:bg-fill" href={`/api/projects/${id}/export/${k}?${qs}`} onClick={() => setOpen(false)}>{label}</a>
           ))}
-          <Link className="block rounded-lg px-3 py-2 text-sm hover:bg-surface" to={`/p/${id}/reports`} onClick={() => setOpen(false)}>Printable report…</Link>
-          <Link className="block rounded-lg px-3 py-2 text-sm hover:bg-surface" to="/settings#api" onClick={() => setOpen(false)}>API, Google Sheets, Looker Studio…</Link>
+          <Link className="block rounded-xl px-3 py-2 text-[13px] hover:bg-fill" to={`/p/${id}/reports`} onClick={() => setOpen(false)}>Printable report…</Link>
+          <Link className="block rounded-xl px-3 py-2 text-[13px] hover:bg-fill" to="/settings#api" onClick={() => setOpen(false)}>API, Google Sheets, Looker Studio…</Link>
         </div>
       )}
     </div>

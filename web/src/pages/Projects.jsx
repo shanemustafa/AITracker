@@ -36,10 +36,10 @@ export default function Projects() {
       {!data.length && <Empty title="No projects yet" action={<Link to="/new" className="btn-primary">Start the guided setup</Link>}>Create your first client project. It takes about two minutes.</Empty>}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {data.map(p => (
-          <Link key={p.id} to={`/p/${p.id}/journey`} className="card group flex flex-col p-5 transition-shadow hover:shadow-md">
+          <Link key={p.id} to={`/p/${p.id}/journey`} className="card rise group flex flex-col p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <div className="truncate font-semibold">{p.name}</div>
+                <div className="truncate text-[17px] font-semibold tracking-title">{p.name}</div>
                 <div className="mt-0.5 text-xs text-muted">{meta.categories[p.category]} · {p.competitors} competitors</div>
               </div>
               {p.data_mode === 'live' ? <Badge tone="good">Live</Badge> : <SimBadge />}
@@ -48,10 +48,10 @@ export default function Projects() {
             <div className="mt-2 text-xs text-ink2">
               {p.complete ? 'All six steps done — ongoing tracking' : <>Next step: <span className="font-medium text-ink">{p.stage?.title}</span></>}
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-2 border-t border-line pt-3 text-center">
-              <div><div className="text-[11px] text-muted">Visibility</div><div className="tnum text-sm font-semibold">{fmtPct(p.own?.visibility)}</div></div>
-              <div><div className="text-[11px] text-muted">Position</div><div className="tnum text-sm font-semibold">{fmtPos(p.own?.position)}</div></div>
-              <div><div className="text-[11px] text-muted">Sentiment</div><div className="text-sm font-semibold"><Sentiment value={p.own?.sentiment} /></div></div>
+            <div className="mt-5 grid grid-cols-3 gap-2 rounded-xl bg-raised py-3 text-center">
+              <div><div className="text-[11px] text-muted">Visibility</div><div className="tnum text-[19px] font-semibold tracking-title">{fmtPct(p.own?.visibility)}</div></div>
+              <div><div className="text-[11px] text-muted">Position</div><div className="tnum text-[19px] font-semibold tracking-title">{fmtPos(p.own?.position)}</div></div>
+              <div><div className="text-[11px] text-muted">Sentiment</div><div className="text-[19px] font-semibold tracking-title"><Sentiment value={p.own?.sentiment} compact /></div></div>
             </div>
             <div className="mt-3 flex items-center justify-between text-xs text-muted">
               <span>{p.running ? <span className="inline-flex items-center gap-1 text-accent"><Loader2 size={12} className="animate-spin" />Checking now</span> : `Last check: ${p.last_run_at ? fmtDate(p.last_run_at) : 'never'}`}</span>
