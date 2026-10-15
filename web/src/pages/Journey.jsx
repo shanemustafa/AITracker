@@ -4,6 +4,7 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { useApi, fmtDate, useColors } from '../lib.js';
 import { useProject } from '../ctx.js';
 import { Card, Spinner, SimBanner, Badge, PageHeader } from '../ui.jsx';
+import { ActivityList } from './Activities.jsx';
 
 const CTA = {
   discovery: 'Fill in discovery notes', setup: 'Review competitors & questions', first_run: 'Press "Run now" above',
@@ -49,6 +50,9 @@ export default function Journey() {
           })}
         </ol>
         <div className="lg:col-span-2 flex flex-col gap-4">
+          <Card title="Activities" subtitle="Calls, meetings, emails and report dates for this client." pad={false}>
+            <ActivityList projectId={project.id} />
+          </Card>
           <Card title="Discovery notes" right={<Link to="../discovery" className="text-xs text-muted underline">Edit</Link>}>
             <Notes d={project.discovery} />
           </Card>

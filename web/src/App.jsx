@@ -131,8 +131,8 @@ function Shell({ user }) {
         {projectNav.map(n => <NavLink key={n.to} to={n.to} className="navlink"><n.icon size={15} />{n.label}</NavLink>)}
       </nav>
       <div className="mt-auto flex flex-col gap-0.5 pt-3" style={{ borderTop: '1px solid var(--line)' }}>
-        <NavLink to="/" end className="navlink"><FolderKanban size={15} />All projects</NavLink>
-        <NavLink to="/new" className="navlink"><Plus size={15} />New project</NavLink>
+        <NavLink to="/" end className="navlink"><FolderKanban size={15} />Clients</NavLink>
+        <NavLink to="/new" className="navlink"><Plus size={15} />New client</NavLink>
         <NavLink to="/settings" className="navlink"><Settings size={15} />Settings</NavLink>
         <div className="mt-2 flex items-center justify-between px-1">
           <ThemeSwitch />

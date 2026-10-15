@@ -11,7 +11,7 @@ export default function ProjectSettings() {
   const { project, reload } = useProject();
   const toast = useToast();
   const nav = useNavigate();
-  const [v, setV] = useState({ name: project.name, category: project.category, engines: project.engines, countries: project.countries, frequency: project.frequency });
+  const [v, setV] = useState({ name: project.name, category: project.category, engines: project.engines, countries: project.countries, frequency: project.frequency, fee: project.fee ?? '', currency: project.currency || 'EUR' });
   const [err, setErr] = useState(null);
   const [del, setDel] = useState(false);
   const [delName, setDelName] = useState('');
@@ -32,6 +32,9 @@ export default function ProjectSettings() {
             <div><label className="label">Project name</label><input className="input" value={v.name} onChange={e => setV({ ...v, name: e.target.value })} /></div>
             <div><label className="label">Type of company</label><select className="input" value={v.category} onChange={e => setV({ ...v, category: e.target.value })}>{Object.entries(meta.categories).map(([k, x]) => <option key={k} value={k}>{x}</option>)}</select></div>
             <div><span className="label">Markets</span><div className="flex flex-wrap gap-2">{Object.entries(meta.countries).map(([k, x]) => <button key={k} className={`chip ${v.countries.includes(k) ? 'chip-on' : ''}`} onClick={() => toggle('countries', k)}>{COUNTRY_FLAGS[k]} {x}</button>)}</div></div>
+            <div><label className="label">Monthly fee for this client (optional, shown on the Clients board)</label>
+              <div className="flex gap-2"><input className="input" inputMode="decimal" placeholder="e.g. 2500" value={v.fee} onChange={e => setV({ ...v, fee: e.target.value })} />
+                <select className="input w-28" value={v.currency} onChange={e => setV({ ...v, currency: e.target.value })}>{['EUR', 'USD', 'GBP', 'SEK'].map(c => <option key={c}>{c}</option>)}</select></div></div>
             <div><label className="label">How often to check</label>
               <select className="input" value={v.frequency} onChange={e => setV({ ...v, frequency: e.target.value })}>
                 <option value="daily">Every day</option><option value="every3">Every 3 days</option><option value="weekly">Every week</option><option value="manual">Only when I press "Run now"</option>

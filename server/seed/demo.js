@@ -86,3 +86,22 @@ export function seedDemo() {
   setSetting('demo_seeded', true);
   console.log('Demo projects ready.');
 }
+
+// Demo fees and follow-ups for the board view. Runs once, also on databases created by older versions.
+export function seedDemoActivities() {
+  if (getSetting('demo_activities_seeded')) return;
+  const day = (d, h = 10) => { const x = new Date(); x.setUTCDate(x.getUTCDate() + d); x.setUTCHours(h, 0, 0, 0); return x.toISOString(); };
+  const plan = {
+    'LeoVegas — Nordic & UK (demo)': { fee: 2500, acts: [['report', 'Send October progress report', day(2, 9)], ['call', 'Monthly review call with Head of Brand', day(3, 13)], ['email', 'Share askgamblers.com listing evidence', day(-12), true]] },
+    'Finnplay — B2B platform (demo)': { fee: 1800, acts: [['meeting', 'Present the first report ("reveal")', day(-1, 12)], ['task', 'Draft first report', day(-3), true]] },
+    'Hacksaw Gaming — studio (demo)': { fee: 1500, acts: [] },
+  };
+  for (const [name, cfg] of Object.entries(plan)) {
+    const p = get("SELECT id FROM projects WHERE name = ? AND data_mode = 'simulated'", name);
+    if (!p) continue;
+    run('UPDATE projects SET fee = COALESCE(fee, ?) WHERE id = ?', cfg.fee, p.id);
+    for (const [type, title, due, done] of cfg.acts)
+      run('INSERT INTO activities(project_id, type, title, due_at, done_at) VALUES (?,?,?,?,?)', p.id, type, title, due, done ? due : null);
+  }
+  setSetting('demo_activities_seeded', true);
+}

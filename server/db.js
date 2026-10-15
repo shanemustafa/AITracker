@@ -82,6 +82,12 @@ CREATE TABLE IF NOT EXISTS action_status (
   title TEXT, status TEXT NOT NULL, note TEXT, updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (project_id, key)
 );
+CREATE TABLE IF NOT EXISTS activities (
+  id INTEGER PRIMARY KEY, project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  type TEXT NOT NULL DEFAULT 'task', title TEXT NOT NULL, due_at TEXT, done_at TEXT, note TEXT,
+  created_by INTEGER, created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_activities_proj ON activities(project_id, done_at, due_at);
 CREATE INDEX IF NOT EXISTS idx_answers_proj_day ON answers(project_id, day);
 CREATE INDEX IF NOT EXISTS idx_answers_prompt ON answers(prompt_id);
 CREATE INDEX IF NOT EXISTS idx_mentions_answer ON mentions(answer_id);
@@ -90,6 +96,11 @@ CREATE INDEX IF NOT EXISTS idx_citations_answer ON citations(answer_id);
 CREATE INDEX IF NOT EXISTS idx_citations_proj ON citations(project_id, domain);
 CREATE INDEX IF NOT EXISTS idx_other_proj ON other_brands(project_id, name);
 `);
+
+// Small upgrades for databases created by older versions (adds columns that are missing).
+const cols = db.prepare("SELECT name FROM pragma_table_info('projects')").all().map(r => r.name);
+if (!cols.includes('fee')) db.exec('ALTER TABLE projects ADD COLUMN fee REAL');
+if (!cols.includes('currency')) db.exec("ALTER TABLE projects ADD COLUMN currency TEXT NOT NULL DEFAULT 'EUR'");
 
 export const all = (sql, ...p) => db.prepare(sql).all(...p);
 export const get = (sql, ...p) => db.prepare(sql).get(...p);

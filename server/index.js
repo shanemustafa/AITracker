@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import { all, get, run, getSetting, setSetting, parseJSON, backup, tx } from './db.js';
 import { authRoutes, requireAuth, requireAdmin, apiToken, newToken } from './auth.js';
 import { BRAND_LIBRARY, PROMPT_LIBRARY, CATEGORIES, COUNTRIES, LANGUAGES } from './seed/library.js';
-import { seedDemo, addBrand, addPrompt } from './seed/demo.js';
+import { seedDemo, seedDemoActivities, addBrand, addPrompt } from './seed/demo.js';
 import { ENGINES, SUPPORTED_ENGINES, estimateAnswerCost } from './engines/index.js';
 import { LIVE_ADAPTERS } from './engines/live.js';
 import { SOURCE_TYPES } from './analysis.js';
@@ -51,7 +51,17 @@ function projectCard(p) {
     own: own ? { name: own.name, visibility: own.visibility, position: own.position, sentiment: own.sentiment, sov: own.sov, rank: own.rank } : null,
     totalAnswers: s.totalAnswers, stage: wf.stages[wf.current], stageIndex: wf.current, complete: wf.complete,
     competitors: s.brands.filter(b => !b.is_own).length, running: !!activeRun(p.id),
+    prevVisibility: own?.prev?.visibility ?? null, fee: p.fee, currency: p.currency || 'EUR',
+    spark: own ? M.daily(p.id, f).series.map(d => ({ day: d.day, v: d[`v_${own.id}`] })) : [],
+    activities: activitySummary(p.id),
   };
+}
+
+// Next planned activity and how many are overdue, for the status dot on board cards.
+function activitySummary(projectId) {
+  const now = new Date().toISOString();
+  const open = all('SELECT * FROM activities WHERE project_id = ? AND done_at IS NULL ORDER BY due_at IS NULL, due_at', projectId);
+  return { open: open.length, overdue: open.filter(a => a.due_at && a.due_at < now).length, next: open[0] || null };
 }
 app.get('/api/projects', wrap(() => all('SELECT * FROM projects ORDER BY id DESC').map(projectCard)));
 
@@ -89,6 +99,8 @@ app.patch('/api/projects/:id', wrap(req => {
   if (b.engines) run('UPDATE projects SET engines = ? WHERE id = ?', JSON.stringify(b.engines.filter(e => ENGINES[e]?.supported)), p.id);
   if (b.countries) run('UPDATE projects SET countries = ? WHERE id = ?', JSON.stringify(b.countries), p.id);
   if (b.frequency) run('UPDATE projects SET frequency = ? WHERE id = ?', b.frequency, p.id);
+  if (b.fee !== undefined) run('UPDATE projects SET fee = ? WHERE id = ?', b.fee === '' || b.fee == null ? null : Math.max(0, Number(b.fee) || 0), p.id);
+  if (b.currency && ['EUR', 'USD', 'GBP', 'SEK'].includes(b.currency)) run('UPDATE projects SET currency = ? WHERE id = ?', b.currency, p.id);
   if (b.discovery) run('UPDATE projects SET discovery = ? WHERE id = ?', JSON.stringify({ ...p.discovery, ...b.discovery }), p.id);
   return { ok: true };
 }));
@@ -115,6 +127,34 @@ app.post('/api/projects/:id/go-live', requireAdmin, wrap(req => {
   });
   return { ok: true, backup: path.basename(file) };
 }));
+
+// ---------- Activities (calls, meetings, emails, tasks per client) ----------
+const ACTIVITY_TYPES = ['call', 'meeting', 'email', 'task', 'report'];
+app.get('/api/projects/:id/activities', wrap(req => {
+  const p = projectOr404(req.params.id);
+  return all('SELECT * FROM activities WHERE project_id = ? ORDER BY done_at IS NOT NULL, due_at IS NULL, due_at, id', p.id);
+}));
+app.post('/api/projects/:id/activities', wrap(req => {
+  const p = projectOr404(req.params.id);
+  const title = String(req.body.title || '').trim();
+  if (!title) throw new Error('Give the activity a short name.');
+  const type = ACTIVITY_TYPES.includes(req.body.type) ? req.body.type : 'task';
+  const due = req.body.due_at ? new Date(req.body.due_at) : null;
+  if (due && isNaN(due)) throw new Error('That date is not valid.');
+  const id = Number(run('INSERT INTO activities(project_id, type, title, due_at, note, created_by) VALUES (?,?,?,?,?,?)',
+    p.id, type, title.slice(0, 200), due ? due.toISOString() : null, req.body.note || null, req.user.id).lastInsertRowid);
+  return get('SELECT * FROM activities WHERE id = ?', id);
+}));
+app.patch('/api/activities/:id', wrap(req => {
+  const a = get('SELECT * FROM activities WHERE id = ?', Number(req.params.id)) || (() => { throw notFound(); })();
+  const b = req.body;
+  const due = b.due_at === undefined ? a.due_at : b.due_at ? new Date(b.due_at).toISOString() : null;
+  run('UPDATE activities SET title = ?, type = ?, due_at = ?, note = ?, done_at = ? WHERE id = ?',
+    b.title?.trim() || a.title, ACTIVITY_TYPES.includes(b.type) ? b.type : a.type, due, b.note ?? a.note,
+    b.done === undefined ? a.done_at : b.done ? new Date().toISOString() : null, a.id);
+  return get('SELECT * FROM activities WHERE id = ?', a.id);
+}));
+app.delete('/api/activities/:id', wrap(req => { run('DELETE FROM activities WHERE id = ?', Number(req.params.id)); return { ok: true }; }));
 
 // ---------- Runs ----------
 app.post('/api/projects/:id/run', wrap(req => {
@@ -399,7 +439,7 @@ if (fs.existsSync(dist)) {
   app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(dist, 'index.html')));
 }
 
-if (!process.env.NO_SEED) seedDemo();
+if (!process.env.NO_SEED) { seedDemo(); seedDemoActivities(); }
 if (!process.env.NO_SCHEDULER) startScheduler();
 // Daily safety backup.
 setInterval(() => { try { backup('daily'); } catch (e) { console.error('Backup failed', e); } }, 24 * 3600 * 1000);
