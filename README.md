@@ -19,7 +19,7 @@ It **measures and advises**. It never tries to change what AI models say, never 
 - **Exports**: CSV downloads, a token-protected API, Google Sheets (`IMPORTDATA`) and Looker Studio (via the sheet).
 - **Team**: logins, invite links, admin/member roles.
 - **Daily automatic runs** plus a "Run now" button, a **monthly spending cap**, and automatic backups.
-- Light and dark mode.
+- Apple-style design: system font, large titles, frosted-glass menus, light and dark mode.
 
 ## Engines
 
