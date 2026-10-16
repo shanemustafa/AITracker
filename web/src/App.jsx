@@ -203,7 +203,7 @@ function ProjectLayout() {
   const running = !!runId;
 
   return (
-    <ProjectCtx.Provider value={{ project, reload: () => { p.reload(); setVersion(v => v + 1); }, version, running }}>
+    <ProjectCtx.Provider value={{ project, reload: () => { p.reload(); setVersion(v => v + 1); }, refreshHeader: p.reload, version, running }}>
       <div className="no-print rise mb-7 flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">

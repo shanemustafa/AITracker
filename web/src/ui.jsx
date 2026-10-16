@@ -3,9 +3,9 @@ import { ArrowDown, ArrowUp, Minus, X, Loader2, FlaskConical, Info, CheckCircle2
 import { useColors } from './lib.js';
 
 export const Card = ({ title, subtitle, right, children, className = '', pad = true }) => (
-  <section className={`card ${className}`}>
+  <section className={`card min-w-0 ${className}`}>
     {(title || right) && (
-      <header className="flex items-start justify-between gap-3 px-6 pt-5">
+      <header className="flex flex-wrap items-start justify-between gap-3 px-6 pt-5">
         <div>
           {title && <h2 className="text-[17px] font-semibold tracking-title text-ink">{title}</h2>}
           {subtitle && <p className="text-[13px] text-muted mt-1 leading-snug">{subtitle}</p>}

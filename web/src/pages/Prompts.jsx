@@ -8,9 +8,10 @@ import FilterBar from './FilterBar.jsx';
 
 export default function Prompts() {
   const meta = useMeta();
-  const { project } = useProject();
+  const { project, refreshHeader } = useProject();
   const { qs } = useFilters();
   const list = useApi(`/projects/${project.id}/prompts?${qs}`);
+  const reloadAll = () => { list.reload(); refreshHeader(); };
   const toast = useToast();
   const [sel, setSel] = useState(new Set());
   const [adding, setAdding] = useState(false);
@@ -29,10 +30,10 @@ export default function Prompts() {
     try {
       await api(`/projects/${project.id}/prompts/bulk`, { method: 'POST', body: { ids: [...sel], action, ...extra } });
       toast(action === 'delete' ? 'Questions deleted (a backup was made first)' : 'Done');
-      setSel(new Set()); setConfirmDel(false); list.reload();
+      setSel(new Set()); setConfirmDel(false); reloadAll();
     } catch (e) { setErr(e.message); }
   };
-  const toggleOne = async p => { await api(`/prompts/${p.id}`, { method: 'PATCH', body: { active: !p.active } }); list.reload(); };
+  const toggleOne = async p => { await api(`/prompts/${p.id}`, { method: 'PATCH', body: { active: !p.active } }); reloadAll(); };
 
   if (list.error) return <ErrorBox error={list.error} />;
   return (
@@ -91,8 +92,8 @@ export default function Prompts() {
           </div>
         )}
       </Card>
-      <AddModal open={adding} onClose={() => setAdding(false)} onDone={() => { setAdding(false); list.reload(); }} />
-      <LibraryModal open={libOpen} onClose={() => setLibOpen(false)} existing={list.data || []} onDone={() => { setLibOpen(false); list.reload(); }} />
+      <AddModal open={adding} onClose={() => setAdding(false)} onDone={() => { setAdding(false); reloadAll(); }} />
+      <LibraryModal open={libOpen} onClose={() => setLibOpen(false)} existing={list.data || []} onDone={() => { setLibOpen(false); reloadAll(); }} />
       <Modal open={confirmDel} onClose={() => setConfirmDel(false)} title="Delete questions?">
         <p className="text-sm text-ink2">This deletes {sel.size} question(s) <strong>and all their past answers</strong>. A backup of everything is made first. If you only want to stop asking them, use <em>Pause</em> instead.</p>
         <div className="mt-5 flex justify-end gap-2"><button className="btn-ghost" onClick={() => setConfirmDel(false)}>Cancel</button><button className="btn-danger" onClick={() => bulk('delete', { confirm: true })}>Delete</button></div>
