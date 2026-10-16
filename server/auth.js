@@ -54,7 +54,7 @@ export function requireAuth(req, res, next) {
     if (t && t === apiToken()) return next();
     return res.status(401).json({ error: 'Missing or wrong API key. Find it in Settings → API & exports.' });
   }
-  const open = ['/auth/login', '/auth/setup', '/auth/state', '/auth/invite'];
+  const open = ['/auth/login', '/auth/setup', '/auth/state', '/auth/invite', '/auth/reset'];
   if (open.some(p => req.path.startsWith(p))) return next();
   const user = currentUser(req);
   if (!user) return res.status(401).json({ error: 'Please log in.' });
@@ -87,6 +87,26 @@ export function authRoutes(app) {
     createSession(res, u.id);
     res.json({ ok: true });
   });
+  // Forgot password: proven by the secret SETUP_CODE that only the hosting owner can see.
+  const resetTries = new Map(); // ip -> [timestamps]
+  app.post('/api/auth/reset', (req, res) => {
+    const ip = req.ip || 'unknown';
+    const recent = (resetTries.get(ip) || []).filter(t => Date.now() - t < 15 * 60 * 1000);
+    if (recent.length >= 10) return res.status(429).json({ error: 'Too many attempts. Please wait 15 minutes.' });
+    resetTries.set(ip, [...recent, Date.now()]);
+    if (!process.env.SETUP_CODE) return res.status(400).json({ error: 'Password reset is switched off: no setup code is set on the server.' });
+    const given = Buffer.from(String(req.body.setupCode || ''));
+    const real = Buffer.from(process.env.SETUP_CODE);
+    if (given.length !== real.length || !crypto.timingSafeEqual(given, real)) return res.status(403).json({ error: 'Wrong setup code.' });
+    const u = get('SELECT id FROM users WHERE email = ?', String(req.body.email || '').trim().toLowerCase());
+    if (!u) return res.status(404).json({ error: 'No account uses that email address.' });
+    if (!req.body.password || req.body.password.length < 8) return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+    run('UPDATE users SET password_hash = ? WHERE id = ?', hashPassword(req.body.password), u.id);
+    run('DELETE FROM sessions WHERE user_id = ?', u.id); // sign out everywhere else
+    createSession(res, u.id);
+    res.json({ ok: true });
+  });
+
   app.post('/api/auth/logout', (req, res) => {
     if (req.cookies?.sid) run('DELETE FROM sessions WHERE token = ?', req.cookies.sid);
     res.clearCookie('sid');

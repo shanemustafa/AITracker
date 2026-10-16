@@ -53,6 +53,20 @@ export function Login() {
         { name: 'email', label: 'Email', type: 'email', auto: 'email' },
         { name: 'password', label: 'Password', type: 'password', auto: 'current-password' },
       ]} />
+      <a href="/reset" className="mt-4 block text-center text-[13px] text-accent hover:underline">Forgot password?</a>
+    </Frame>
+  );
+}
+
+export function Reset() {
+  return (
+    <Frame title="Reset password" subtitle="Use the secret setup code from your hosting settings (Railway → AITracker → Variables → SETUP_CODE).">
+      <Form button="Set new password" submit={v => api('/auth/reset', { method: 'POST', body: v })} fields={[
+        { name: 'email', label: 'Your email (your username)', type: 'email', auto: 'email' },
+        { name: 'setupCode', label: 'Setup code', type: 'password', auto: 'off' },
+        { name: 'password', label: 'New password (8+ characters)', type: 'password', auto: 'new-password' },
+      ]} />
+      <a href="/login" className="mt-4 block text-center text-[13px] text-accent hover:underline">Back to sign in</a>
     </Frame>
   );
 }

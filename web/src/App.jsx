@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { api, useApi, setTheme, useDark, useFilters, fmtDate, PREVIEW } from './lib.js';
 import { Spinner, SimBadge, Badge, ErrorBox, useToast, Segmented } from './ui.jsx';
-import { Login, Setup, Invite } from './pages/Auth.jsx';
+import { Login, Setup, Invite, Reset } from './pages/Auth.jsx';
 import Projects from './pages/Projects.jsx';
 import Quickstart from './pages/Quickstart.jsx';
 import Overview from './pages/Overview.jsx';
@@ -31,6 +31,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={auth.needsSetup ? <Navigate to="/setup" /> : <Login />} />
+      <Route path="/reset" element={<Reset />} />
       <Route path="/setup" element={auth.needsSetup ? <Setup codeRequired={auth.setupCodeRequired} /> : <Navigate to="/login" />} />
       <Route path="/invite/:token" element={<Invite />} />
       <Route path="/p/:id/reports/:rid/print" element={auth.user ? <Authed user={auth.user} bare><ReportView print /></Authed> : <Navigate to="/login" />} />
