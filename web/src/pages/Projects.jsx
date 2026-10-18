@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Plus, ArrowRight, Check, Loader2, Columns3, LayoutGrid } from 'lucide-react';
 import Board, { money } from './Board.jsx';
 import { useApi, fmtPct, fmtPos, fmtDate } from '../lib.js';
-import { useMeta } from '../ctx.js';
+import { useMeta, useUser } from '../ctx.js';
 import { PageHeader, Spinner, ErrorBox, SimBadge, Badge, Empty, Sentiment, Segmented } from '../ui.jsx';
 
 const STAGES = ['Discovery', 'Setup', 'First run', 'First report', 'Actions', 'Tracking'];
@@ -29,6 +29,9 @@ export function StageDots({ index, complete }) {
 export default function Projects() {
   const meta = useMeta();
   const { data, error, reload } = useApi('/projects');
+  const user = useUser();
+  const legal = useApi('/legal');
+  const legalMissing = user?.role === 'admin' && legal.data && !(legal.data.company.name && legal.data.company.businessId && legal.data.company.email);
   const [view, setViewState] = useState(() => { try { return localStorage.getItem('clientsView') || 'board'; } catch { return 'board'; } });
   const setView = v => { setViewState(v); try { localStorage.setItem('clientsView', v); } catch { /* private mode */ } };
   if (error) return <ErrorBox error={error} />;
@@ -45,6 +48,9 @@ export default function Projects() {
           ]} />
           <Link to="/new" className="btn-primary"><Plus size={15} />New client</Link>
         </>} />
+      {legalMissing && <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-warnBg px-5 py-3 text-[13px] text-warnInk">
+        <span><strong>Finish your legal pages.</strong> Add your company name, business ID and contact email so the Privacy policy and Terms are complete.</span>
+        <Link to="/settings#company" className="btn-ghost btn-sm">Add company details</Link></div>}
       {view === 'board' && data.length > 0 && <Board projects={data} reload={reload} />}
       {!data.length && <Empty title="No projects yet" action={<Link to="/new" className="btn-primary">Start the guided setup</Link>}>Create your first client project. It takes about two minutes.</Empty>}
       {view === 'cards' && <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

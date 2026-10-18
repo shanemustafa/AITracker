@@ -22,7 +22,9 @@ export default function Overview() {
   const own = s.brands.find(b => b.is_own);
   const colorOf = Object.fromEntries(s.brands.map(b => [b.id, b.color]));
 
-  if (!s.totalAnswers) return <><FilterBar /><Empty title="No answers in this period yet" action={<Link className="btn-primary" to="../prompts">Check your questions</Link>}>Press "Run now" at the top to ask the AI engines your questions. Results appear here within minutes.</Empty></>;
+  if (!s.totalAnswers) return <><FilterBar />{project.data_mode === 'live'
+    ? <Empty title="No real answers yet" action={<Link className="btn-primary" to="/settings">Connect an AI engine</Link>}>This client uses real AI answers. Connect at least one AI engine and set a monthly spending cap in Settings, then press "Run now" at the top. Results appear within minutes.</Empty>
+    : <Empty title="No answers in this period yet" action={<Link className="btn-primary" to="../prompts">Check your questions</Link>}>Press "Run now" at the top to ask the AI engines your questions. Results appear here within minutes.</Empty>}</>;
 
   return (
     <>

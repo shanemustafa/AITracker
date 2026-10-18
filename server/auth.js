@@ -54,7 +54,7 @@ export function requireAuth(req, res, next) {
     if (t && t === apiToken()) return next();
     return res.status(401).json({ error: 'Missing or wrong API key. Find it in Settings → API & exports.' });
   }
-  const open = ['/auth/login', '/auth/setup', '/auth/state', '/auth/invite', '/auth/reset'];
+  const open = ['/auth/login', '/auth/setup', '/auth/state', '/auth/invite', '/auth/reset', '/legal'];
   if (open.some(p => req.path.startsWith(p))) return next();
   const user = currentUser(req);
   if (!user) return res.status(401).json({ error: 'Please log in.' });

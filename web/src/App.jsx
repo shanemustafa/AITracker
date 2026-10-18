@@ -8,6 +8,7 @@ import {
 import { api, useApi, setTheme, useDark, useFilters, fmtDate, PREVIEW } from './lib.js';
 import { Spinner, SimBadge, Badge, ErrorBox, useToast, Segmented } from './ui.jsx';
 import { Login, Setup, Invite, Reset } from './pages/Auth.jsx';
+import { Privacy, Terms, LegalNotice, LegalLinks } from './pages/Legal.jsx';
 import Projects from './pages/Projects.jsx';
 import Quickstart from './pages/Quickstart.jsx';
 import Overview from './pages/Overview.jsx';
@@ -32,6 +33,9 @@ export default function App() {
     <Routes>
       <Route path="/login" element={auth.needsSetup ? <Navigate to="/setup" /> : <Login />} />
       <Route path="/reset" element={<Reset />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/legal" element={<LegalNotice />} />
       <Route path="/setup" element={auth.needsSetup ? <Setup codeRequired={auth.setupCodeRequired} /> : <Navigate to="/login" />} />
       <Route path="/invite/:token" element={<Invite />} />
       <Route path="/p/:id/reports/:rid/print" element={auth.user ? <Authed user={auth.user} bare><ReportView print /></Authed> : <Navigate to="/login" />} />
@@ -140,6 +144,7 @@ function Shell({ user }) {
           <button onClick={logout} className="text-muted hover:text-ink" title={`Log out ${user.email}`} aria-label="Log out"><LogOut size={15} /></button>
         </div>
         <div className="truncate px-1 text-[11px] text-muted">{user.email}</div>
+        <LegalLinks className="mt-2 px-1" />
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../lib.js';
 import { ErrorBox } from '../ui.jsx';
+import { LegalLinks } from './Legal.jsx';
 
 function Frame({ title, subtitle, children }) {
   return (
@@ -18,6 +19,7 @@ function Frame({ title, subtitle, children }) {
         </div>
         <div className="card p-7 shadow-lift">{children}</div>
         <p className="mt-6 text-center text-xs text-muted">AI Answer Tracker measures what AI assistants say about brands.<br />It never tries to change it.</p>
+        <LegalLinks className="mt-4 flex flex-col items-center text-center" />
       </div>
     </div>
   );

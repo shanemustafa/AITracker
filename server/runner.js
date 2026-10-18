@@ -166,7 +166,12 @@ export function startScheduler() {
   const tick = () => {
     const hour = Number(getSetting('run_hour_utc', 5));
     if (new Date().getUTCHours() < hour) return;
-    for (const p of all("SELECT id, frequency, last_run_at FROM projects WHERE frequency != 'manual'")) {
+    for (const p of all("SELECT id, frequency, last_run_at, data_mode, engines FROM projects WHERE frequency != 'manual'")) {
+      // Real-data projects only run automatically once an engine key and a spending cap are set.
+      if (p.data_mode === 'live') {
+        const keys = parseJSON(p.engines, []).filter(e => ENGINES[e]?.supported && (getSetting(ENGINES[e].keySetting) || process.env[ENGINES[e].keySetting.toUpperCase()]));
+        if (!keys.length || !Number(getSetting('monthly_cap', 0))) continue;
+      }
       const every = INTERVAL_DAYS[p.frequency] || 1;
       const last = p.last_run_at ? new Date(p.last_run_at + 'Z') : new Date(0);
       const due = isoDay(last.getTime() + every * 86400000) <= isoDay(Date.now());

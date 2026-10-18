@@ -20,6 +20,7 @@ It **measures and advises**. It never tries to change what AI models say, never 
 - **Team**: logins, invite links, admin/member roles.
 - **Daily automatic runs** plus a "Run now" button, a **monthly spending cap**, and automatic backups.
 - Apple-style design: system font, large titles, frosted-glass menus, light and dark mode.
+- **Legal pages**: Privacy policy, Terms of use and Legal notice (public), filled from Settings → Company & legal. No tracking cookies, no third-party fonts or scripts, security headers, hidden from search engines.
 
 ## Engines
 
@@ -37,7 +38,7 @@ API answers come from the same model families as the consumer apps but are not i
 
 ## Demo mode
 
-Out of the box the app runs in **demo mode** with three example projects (LeoVegas, Finnplay, Hacksaw Gaming). All demo answers are **simulated** and labelled as such on every screen, in every export (`simulated` column, `SIMULATED-DATA-` file names) and in every report (banner + watermark).
+With `SEED_DEMO=1` the app starts in **demo mode** with three example projects (LeoVegas, Finnplay, Hacksaw Gaming). All demo answers are **simulated** and labelled as such on every screen, in every export (`simulated` column, `SIMULATED-DATA-` file names) and in every report (banner + watermark).
 
 ## Running it on a computer
 
@@ -54,7 +55,8 @@ Data lives in `data/app.db` (or the folder in `DATA_DIR`). Backups go to `data/b
 
 | Variable | Purpose |
 |---|---|
-| `SETUP_CODE` | Required to create the first (admin) account. Set this when the app is online. |
+| `SETUP_CODE` | Required to create the first (admin) account, and to reset a forgotten password. Set this when the app is online. |
+| `SEED_DEMO` | Set to `1` to load the three simulated demo clients on a new installation. Leave unset for a real installation. |
 | `DATA_DIR` | Where the database and backups are stored (use a persistent disk). |
 | `PORT` | Web port (default 3000). |
 | `KEY_OPENAI`, `KEY_GEMINI`, `KEY_PERPLEXITY`, `KEY_ANTHROPIC` | API keys, if you prefer not to paste them in Settings. |

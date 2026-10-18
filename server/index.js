@@ -7,6 +7,7 @@ import { all, get, run, getSetting, setSetting, parseJSON, backup, tx } from './
 import { authRoutes, requireAuth, requireAdmin, apiToken, newToken } from './auth.js';
 import { BRAND_LIBRARY, PROMPT_LIBRARY, CATEGORIES, COUNTRIES, LANGUAGES } from './seed/library.js';
 import { seedDemo, seedDemoActivities, addBrand, addPrompt } from './seed/demo.js';
+import { runMigrations } from './migrations.js';
 import { ENGINES, SUPPORTED_ENGINES, estimateAnswerCost } from './engines/index.js';
 import { LIVE_ADAPTERS } from './engines/live.js';
 import { SOURCE_TYPES } from './analysis.js';
@@ -17,6 +18,20 @@ import { createReport, listReports, getReport, workflow } from './reports.js';
 
 const app = express();
 app.set('trust proxy', 1);
+app.disable('x-powered-by');
+// Standard browser security settings.
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('X-Robots-Tag', 'noindex, nofollow');
+  if (req.secure) res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+  next();
+});
+// This is a private tool: ask search engines not to list it.
+app.get('/robots.txt', (req, res) => res.type('text/plain').send('User-agent: *\nDisallow: /\n'));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
 app.use('/api', requireAuth);
@@ -32,6 +47,11 @@ const wrap = fn => (req, res) => {
 const notFound = () => Object.assign(new Error('Not found'), { status: 404 });
 const projectOr404 = id => getProject(Number(id)) || (() => { throw notFound(); })();
 const mode = () => getSetting('mode', 'demo');
+
+// ---------- Company & legal details (public, shown on the legal pages) ----------
+const COMPANY_FIELDS = ['name', 'businessId', 'vatId', 'address', 'country', 'email', 'phone', 'website', 'representative'];
+const company = () => ({ ...Object.fromEntries(COMPANY_FIELDS.map(k => [k, ''])), country: 'Finland', ...getSetting('company', {}) });
+app.get('/api/legal', wrap(() => ({ company: company(), updated: getSetting('legal_updated', '2026-10-18'), hostingRegion: getSetting('hosting_region', 'United States') })));
 
 // ---------- Reference data ----------
 app.get('/api/meta', wrap(() => ({
@@ -378,7 +398,8 @@ function settingsView() {
     };
   });
   return {
-    mode: mode(), monthly_cap: Number(getSetting('monthly_cap', 0)), run_hour_utc: Number(getSetting('run_hour_utc', 5)),
+    mode: mode(), monthly_cap: Number(getSetting('monthly_cap', 0)), run_hour_utc: Number(getSetting('run_hour_utc', 5)), company: company(),
+    hosting_region: getSetting('hosting_region', 'United States'),
     engines, spend: monthSpend(), spendByEngine: spendByEngine(), apiToken: apiToken(),
   };
 }
@@ -386,6 +407,11 @@ app.get('/api/settings', wrap(() => settingsView()));
 app.patch('/api/settings', requireAdmin, wrap(req => {
   const b = req.body;
   if (b.mode && ['demo', 'live'].includes(b.mode)) setSetting('mode', b.mode);
+  if (b.company) {
+    setSetting('company', { ...company(), ...Object.fromEntries(COMPANY_FIELDS.filter(k => b.company[k] !== undefined).map(k => [k, String(b.company[k]).trim().slice(0, 300)])) });
+    setSetting('legal_updated', new Date().toISOString().slice(0, 10));
+  }
+  if (b.hosting_region) setSetting('hosting_region', String(b.hosting_region).slice(0, 80));
   if (b.monthly_cap !== undefined) setSetting('monthly_cap', Math.max(0, Number(b.monthly_cap) || 0));
   if (b.run_hour_utc !== undefined) setSetting('run_hour_utc', Math.min(23, Math.max(0, Number(b.run_hour_utc) || 0)));
   for (const e of Object.values(ENGINES).filter(x => x.supported)) {
@@ -439,7 +465,9 @@ if (fs.existsSync(dist)) {
   app.get(/^(?!\/api).*/, (req, res) => res.sendFile(path.join(dist, 'index.html')));
 }
 
-if (!process.env.NO_SEED) { seedDemo(); seedDemoActivities(); }
+// Demo data only when asked for (SEED_DEMO=1). Real installations start empty.
+if (!process.env.NO_SEED && process.env.SEED_DEMO === '1') { seedDemo(); seedDemoActivities(); }
+runMigrations();
 if (!process.env.NO_SCHEDULER) startScheduler();
 // Daily safety backup.
 setInterval(() => { try { backup('daily'); } catch (e) { console.error('Backup failed', e); } }, 24 * 3600 * 1000);

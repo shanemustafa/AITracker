@@ -82,6 +82,15 @@ tbody tr:hover { background: var(--raised); }
 .eyebrow { @apply text-xs font-semibold uppercase tracking-wider text-muted; }
 }
 
+/* Legal pages */
+.legal { font-size: 15px; line-height: 1.7; color: var(--ink2); }
+.legal h2 { margin: 2rem 0 0.6rem; font-size: 19px; font-weight: 600; letter-spacing: -0.015em; color: var(--ink); }
+.legal p { margin: 0.6rem 0; }
+.legal ul { margin: 0.6rem 0; padding-left: 1.2rem; list-style: disc; }
+.legal li { margin: 0.35rem 0; }
+.legal a { color: var(--accent); }
+.legal code { background: var(--fill); padding: 1px 6px; border-radius: 6px; font-size: 13px; }
+.legal strong { color: var(--ink); }
 mark.brand { background: transparent; border-bottom: 2px solid; padding: 0 2px; border-radius: 3px; font-weight: 600; color: var(--ink); }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .rise { animation: rise .45s cubic-bezier(.2,.7,.2,1) backwards; }

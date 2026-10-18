@@ -5,7 +5,7 @@ import { api, useApi, fmtMoney } from '../lib.js';
 import { useMeta, useUser } from '../ctx.js';
 import { Card, PageHeader, Spinner, ErrorBox, Badge, Segmented, useToast, Modal, Tip } from '../ui.jsx';
 
-const TABS = [['engines', 'AI engines'], ['costs', 'Costs & limits'], ['team', 'Team'], ['api', 'API & exports'], ['data', 'Mode & backups']];
+const TABS = [['engines', 'AI engines'], ['costs', 'Costs & limits'], ['team', 'Team'], ['api', 'API & exports'], ['company', 'Company & legal'], ['data', 'Mode & backups']];
 
 const KEY_HELP = {
   chatgpt: { site: 'https://platform.openai.com/api-keys', steps: ['Go to platform.openai.com and sign up or log in.', 'Click Settings (gear) → Billing → add a payment card and buy $10 of credit.', 'Click API keys → "Create new secret key" → name it "AI Tracker" → Create.', 'Copy the key (starts with sk-) and paste it here. You can only see it once.'] },
@@ -30,6 +30,7 @@ export default function SettingsPage() {
         {tab === 'costs' && <Costs s={s.data} reload={s.reload} />}
         {tab === 'team' && <Team />}
         {tab === 'api' && <ApiTab s={s.data} reload={s.reload} />}
+        {tab === 'company' && <CompanyTab s={s.data} reload={s.reload} />}
         {tab === 'data' && <DataTab s={s.data} reload={s.reload} />}
       </>}
     </>
@@ -227,6 +228,46 @@ function ApiTab({ s, reload }) {
           <p className="mt-2 text-xs text-muted">Simulated rows are marked "yes" in the simulated column. Filter them out before showing a client.</p>
         </Card>
       </div>
+    </div>
+  );
+}
+
+function CompanyTab({ s, reload }) {
+  const user = useUser();
+  const toast = useToast();
+  const [c, setC] = useState(s.company);
+  const [region, setRegion] = useState(s.hosting_region);
+  const admin = user.role === 'admin';
+  const fields = [
+    ['name', 'Company name *', 'e.g. Example Oy'], ['businessId', 'Business ID (Y-tunnus) *', 'e.g. 1234567-8'], ['vatId', 'VAT number', 'e.g. FI12345678'],
+    ['address', 'Street address, postcode and city *', 'e.g. Mannerheimintie 1, 00100 Helsinki'], ['country', 'Country *', 'Finland'],
+    ['email', 'Contact email for privacy questions *', 'e.g. privacy@example.fi'], ['phone', 'Phone', ''], ['website', 'Company website', 'e.g. https://example.fi'],
+    ['representative', 'Responsible person', 'e.g. Jane Doe, CEO'],
+  ];
+  const save = async () => { await api('/settings', { method: 'PATCH', body: { company: c, hosting_region: region } }); toast('Saved — the legal pages are updated'); reload(); };
+  return (
+    <div className="grid gap-4 lg:grid-cols-5">
+      <Card className="lg:col-span-3" title="Company details" subtitle="Shown on the Privacy policy, Terms of use and Legal notice pages. Fields marked * are needed for the pages to be complete.">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {fields.map(([k, label, ph]) => (
+            <div key={k} className={k === 'address' ? 'sm:col-span-2' : ''}><label className="label">{label}</label>
+              <input className="input" disabled={!admin} placeholder={ph} value={c[k] || ''} onChange={e => setC({ ...c, [k]: e.target.value })} /></div>
+          ))}
+          <div className="sm:col-span-2"><label className="label">Where the hosting servers are (as set in Railway)</label>
+            <select className="input" disabled={!admin} value={region} onChange={e => setRegion(e.target.value)}>
+              {['United States', 'European Union (Netherlands)', 'Asia', 'Other'].map(r => <option key={r}>{r}</option>)}
+            </select></div>
+        </div>
+        <button className="btn-primary mt-4" disabled={!admin} onClick={save}>Save</button>
+      </Card>
+      <Card className="lg:col-span-2" title="Your legal pages" subtitle="Public pages, linked on the sign-in page and in the menu.">
+        <ul className="grid gap-2 text-sm">
+          {[['/privacy', 'Privacy policy'], ['/terms', 'Terms of use'], ['/legal', 'Legal notice']].map(([to, l]) => (
+            <li key={to}><a className="text-accent hover:underline" href={to} target="_blank" rel="noreferrer">{l} ↗</a></li>
+          ))}
+        </ul>
+        <p className="mt-4 text-xs text-muted">These pages were written for a Finnish/EU business tool in plain English. They are a solid starting point, not legal advice: have a lawyer or a GDPR template service check them before clients sign in. Missing details show as yellow placeholders.</p>
+      </Card>
     </div>
   );
 }
