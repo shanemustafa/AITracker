@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { MetaCtx, useMeta, ProjectCtx, UserCtx } from './ctx.js';
+import { motion } from 'framer-motion';
+import { Logo, PageIn, Skeleton } from './motion.jsx';
 import { Routes, Route, Navigate, NavLink, Outlet, useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, MessageSquareText, Link2, Users, ListChecks, FileText, Settings, Plus, FolderKanban,
@@ -118,9 +120,7 @@ function Shell({ user }) {
   const sidebar = (
     <div className="flex h-full flex-col gap-5 px-3 py-5">
       <Link to="/" className="flex items-center gap-2.5 px-2">
-        <span className="grid h-8 w-8 place-items-center rounded-[10px] text-white shadow-thumb" style={{ background: 'linear-gradient(135deg, #0a84ff, #5e5ce6)' }}>
-          <svg width="16" height="16" viewBox="0 0 32 32"><path d="M6 23l6-8 5 5 9-12" stroke="white" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
-        </span>
+        <Logo size={32} />
         <span className="text-[15px] font-semibold tracking-title">AI Answer Tracker</span>
       </Link>
       {meta.mode === 'demo' ? <Link to="/settings" className="mx-1"><Badge tone="warn" className="w-full justify-center py-1.5">Demo mode · simulated answers</Badge></Link>
@@ -133,12 +133,12 @@ function Shell({ user }) {
         </select>
       </div>
       <nav className="flex flex-col gap-0.5">
-        {projectNav.map(n => <NavLink key={n.to} to={n.to} className="navlink"><n.icon size={15} />{n.label}</NavLink>)}
+        {projectNav.map(n => <NavItem key={n.to} {...n} />)}
       </nav>
       <div className="mt-auto flex flex-col gap-0.5 pt-3" style={{ borderTop: '1px solid var(--line)' }}>
-        <NavLink to="/" end className="navlink"><FolderKanban size={15} />Clients</NavLink>
-        <NavLink to="/new" className="navlink"><Plus size={15} />New client</NavLink>
-        <NavLink to="/settings" className="navlink"><Settings size={15} />Settings</NavLink>
+        <NavItem to="/" end icon={FolderKanban} label="Clients" />
+        <NavItem to="/new" icon={Plus} label="New client" />
+        <NavItem to="/settings" icon={Settings} label="Settings" />
         <div className="mt-2 flex items-center justify-between px-1">
           <ThemeSwitch />
           <button onClick={logout} className="text-muted hover:text-ink" title={`Log out ${user.email}`} aria-label="Log out"><LogOut size={15} /></button>
@@ -153,7 +153,7 @@ function Shell({ user }) {
     <div className="min-h-screen md:flex">
       <aside className="glass no-print hidden md:block w-64 shrink-0 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)' }}>{sidebar}</aside>
       <div className="glass no-print md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--line)' }}>
-        <span className="text-sm font-semibold">AI Answer Tracker</span>
+        <span className="flex items-center gap-2 text-sm font-semibold"><Logo size={24} />AI Answer Tracker</span>
         <button onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={18} /></button>
       </div>
       {open && (
@@ -167,14 +167,29 @@ function Shell({ user }) {
       <main className="min-w-0 flex-1 px-4 py-6 md:px-10 md:py-10 print-full">
         {PREVIEW && <div className="no-print mx-auto mb-4 max-w-[1280px] rounded-2xl bg-accentSoft px-5 py-3 text-[13px] text-ink">
           <strong>Read-only preview.</strong> Click anything to look around. Saving, "Run now", downloads and some filters (country, tag, search) only work in the real app.</div>}
-        <div className="mx-auto max-w-[1280px] print-full"><Outlet context={{ reloadProjects: projects.reload }} /></div>
+        <div className="mx-auto max-w-[1280px] print-full">
+          <PageIn key={pid ? `p${pid}` : loc.pathname}><Outlet context={{ reloadProjects: projects.reload }} /></PageIn>
+        </div>
       </main>
     </div>
   );
 }
 
+// Menu item; the grey highlight slides to the page you open.
+function NavItem({ to, icon: Icon, label, end }) {
+  return (
+    <NavLink to={to} end={end} className="navlink relative">
+      {({ isActive }) => <>
+        {isActive && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-lg bg-fill" transition={{ type: 'spring', stiffness: 500, damping: 40 }} />}
+        <Icon size={15} className="relative" /><span className="relative">{label}</span>
+      </>}
+    </NavLink>
+  );
+}
+
 function ProjectLayout() {
   const { id } = useParams();
+  const loc = useLocation();
   const p = useApi(`/projects/${id}`, [id]);
   const toast = useToast();
   const [runId, setRunId] = useState(null);
@@ -199,7 +214,7 @@ function ProjectLayout() {
     return () => clearTimeout(timer.current);
   }, [runId]);
 
-  if (!p.data) return p.error ? <ErrorBox error={p.error} /> : <Spinner />;
+  if (!p.data) return p.error ? <ErrorBox error={p.error} /> : <Skeleton />;
   const project = p.data;
   const runNow = async () => {
     setErr(null);
@@ -223,7 +238,7 @@ function ProjectLayout() {
         </div>
         <div className="flex items-center gap-2">
           <ExportMenu id={id} />
-          <button className="btn-primary" onClick={runNow} disabled={running}>
+          <button className={`btn-primary ${running ? 'shimmer' : ''}`} onClick={runNow} disabled={running}>
             {running ? <><Loader2 size={15} className="animate-spin" />Checking… {runState ? `${runState.done}/${runState.total}` : ''}</> : <><Play size={15} />Run now</>}
           </button>
         </div>
@@ -237,7 +252,7 @@ function ProjectLayout() {
       {project.lastRun?.message && !running && project.lastRun.status !== 'done' && (
         <div className="mb-4"><ErrorBox error={`Last check (${fmtDate(project.lastRun.started_at)}): ${project.lastRun.message}`} /></div>
       )}
-      <Outlet key={version} />
+      <PageIn key={`${loc.pathname}-${version}`}><Outlet /></PageIn>
     </ProjectCtx.Provider>
   );
 }

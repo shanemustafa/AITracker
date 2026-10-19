@@ -26,7 +26,7 @@ export default function Reports() {
         right={<button className="btn-primary" onClick={create} disabled={busy}><Plus size={15} />{busy ? 'Creating…' : first ? 'Create first report' : 'Create progress report'}</button>} />
       <ErrorBox error={err} />
       {!list.data ? <Spinner /> : first ? (
-        <Empty title="No reports yet" action={<button className="btn-primary" onClick={create}>Create the first report</button>}>
+        <Empty art title="No reports yet" action={<button className="btn-primary" onClick={create}>Create the first report</button>}>
           The first report compares the client with competitors on visibility, position and sentiment, and shows the sources behind the gap. It covers the last 30 days.
         </Empty>
       ) : (

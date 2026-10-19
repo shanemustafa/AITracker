@@ -1,5 +1,7 @@
-import { useEffect, useState, createContext, useContext } from 'react';
-import { ArrowDown, ArrowUp, Minus, X, Loader2, FlaskConical, Info, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { useEffect, useState, createContext, useContext, useId } from 'react';
+import { motion } from 'framer-motion';
+import { OrbitArt, stagger } from './motion.jsx';
+import { ArrowDown, ArrowUp, Minus, X, FlaskConical, Info, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { useColors } from './lib.js';
 
 export const Card = ({ title, subtitle, right, children, className = '', pad = true }) => (
@@ -31,9 +33,9 @@ export function Delta({ now, before, invert = false, unit = 'pts', digits = 1, s
   );
 }
 
-export function Stat({ label, value, help, delta, sub }) {
+export function Stat({ label, value, help, delta, sub, i = 0 }) {
   return (
-    <div className="card rise p-5 md:p-6">
+    <div className="card rise p-5 md:p-6" style={stagger(i)}>
       <div className="flex items-center gap-1.5 text-[13px] font-medium text-muted">
         {label}{help && <Tip text={help} />}
       </div>
@@ -73,13 +75,16 @@ export function SimBanner({ show, children }) {
 }
 
 export const Spinner = ({ label }) => (
-  <div className="flex items-center gap-2 py-10 justify-center text-sm text-muted"><Loader2 className="animate-spin" size={16} />{label || 'Loading…'}</div>
+  <div className="grid gap-2.5 py-6" aria-busy="true" aria-label={label || 'Loading'}>
+    <div className="skeleton h-3.5 w-2/5" /><div className="skeleton h-3.5 w-4/5" /><div className="skeleton h-3.5 w-3/5" />
+  </div>
 );
 export const ErrorBox = ({ error }) => error ? (
   <div className="flex items-start gap-2 rounded-lg border border-bad px-3 py-2 text-sm text-bad"><AlertTriangle size={15} className="mt-0.5 shrink-0" />{error}</div>
 ) : null;
-export const Empty = ({ title, children, action }) => (
-  <div className="card flex flex-col items-center justify-center px-6 py-16 text-center">
+export const Empty = ({ title, children, action, art }) => (
+  <div className="card rise flex flex-col items-center justify-center px-6 py-16 text-center">
+    {art && <OrbitArt />}
     <div className="text-[17px] font-semibold tracking-title text-ink">{title}</div>
     {children && <div className="mt-1 max-w-md text-sm text-muted">{children}</div>}
     {action && <div className="mt-4">{action}</div>}
@@ -139,13 +144,16 @@ export function Bar({ value, max = 100, slot = 1 }) {
   );
 }
 
+// iOS-style switch: the white highlight slides to the chosen option.
 export function Segmented({ value, onChange, options, size = 'md' }) {
+  const id = useId();
   return (
     <div className="inline-flex rounded-[10px] bg-fill p-[3px]" role="radiogroup">
       {options.map(o => (
         <button key={o.value} role="radio" aria-checked={value === o.value} onClick={() => onChange(o.value)}
-          className={`rounded-[8px] ${size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3.5 py-1.5 text-[13px]'} font-medium transition-all duration-200 ${value === o.value ? 'bg-surface text-ink shadow-thumb' : 'text-ink2 hover:text-ink'}`}>
-          {o.label}
+          className={`relative rounded-[8px] ${size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3.5 py-1.5 text-[13px]'} font-medium transition-colors duration-200 ${value === o.value ? 'text-ink' : 'text-ink2 hover:text-ink'}`}>
+          {value === o.value && <motion.span layoutId={`seg-${id}`} className="absolute inset-0 rounded-[8px] bg-surface shadow-thumb" transition={{ type: 'spring', stiffness: 500, damping: 38 }} />}
+          <span className="relative">{o.label}</span>
         </button>
       ))}
     </div>

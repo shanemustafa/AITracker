@@ -5,6 +5,7 @@ import { useApi, useFilters, api, fmtDate } from '../lib.js';
 import { useMeta, useProject } from '../ctx.js';
 import { PageHeader, Spinner, ErrorBox, Badge, SimBanner, Empty, Segmented, useToast } from '../ui.jsx';
 import FilterBar from './FilterBar.jsx';
+import { stagger } from '../motion.jsx';
 
 const PRI = { high: { label: 'High priority', tone: 'bad' }, medium: { label: 'Medium', tone: 'warn' }, low: { label: 'Low', tone: 'default' } };
 const TYPE = { source: 'Get mentioned', content: 'Content gap', engine: 'Engine gap', market: 'Market gap', reputation: 'Reputation', tracking: 'Tracking' };
@@ -39,10 +40,10 @@ export default function Actions() {
           { value: 'dismissed', label: `Hidden (${counts.dismissed || 0})` }, { value: 'all', label: 'All' },
         ]} />
       </div>
-      {!list.data ? <Spinner /> : !rows.length ? <Empty title={show === 'open' ? 'Nothing to do right now' : 'Nothing here'}>{show === 'open' ? 'Either there is not enough data yet, or you have handled every suggestion.' : ''}</Empty> : (
+      {!list.data ? <Spinner /> : !rows.length ? <Empty art={show === 'open'} title={show === 'open' ? 'Nothing to do right now' : 'Nothing here'}>{show === 'open' ? 'Either there is not enough data yet, or you have handled every suggestion.' : ''}</Empty> : (
         <div className="flex flex-col gap-3">
           {rows.map((a, i) => (
-            <article key={a.key} className="card p-5">
+            <article key={a.key} className="card rise p-5" style={stagger(i)}>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs tnum text-muted">{i + 1}.</span>
                 <Badge tone={PRI[a.priority].tone}>{PRI[a.priority].label}</Badge>

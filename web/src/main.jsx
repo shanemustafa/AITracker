@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { PREVIEW } from './lib.js';
+import { MotionConfig } from 'framer-motion';
+import { installSpotlight } from './motion.jsx';
 
 const Router = PREVIEW ? MemoryRouter : BrowserRouter;
 if (PREVIEW) {
@@ -15,10 +17,14 @@ import App from './App.jsx';
 import { ToastProvider } from './ui.jsx';
 import './styles.css';
 
+installSpotlight();
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <Router>
-      <ToastProvider><App /></ToastProvider>
-    </Router>
+    <MotionConfig reducedMotion="user">
+      <Router>
+        <ToastProvider><App /></ToastProvider>
+      </Router>
+    </MotionConfig>
   </React.StrictMode>,
 );

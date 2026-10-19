@@ -75,7 +75,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Di
 tbody tr { transition: background-color .15s; }
 tbody tr:hover { background: var(--raised); }
 .navlink { @apply flex items-center gap-2.5 rounded-lg px-2.5 py-[7px] text-[13px] text-ink2 transition-colors hover:bg-fill hover:text-ink; }
-.navlink.active { @apply bg-fill text-ink font-semibold; }
+.navlink.active { @apply text-ink font-semibold; }
 .navlink.active svg { color: var(--accent); }
 .compact .th, .compact .td { padding-left: 0.6rem; padding-right: 0.6rem; }
 .glass { background: var(--glass); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); }
@@ -94,7 +94,35 @@ tbody tr:hover { background: var(--raised); }
 mark.brand { background: transparent; border-bottom: 2px solid; padding: 0 2px; border-radius: 3px; font-weight: 600; color: var(--ink); }
 @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .rise { animation: rise .45s cubic-bezier(.2,.7,.2,1) backwards; }
-@media (prefers-reduced-motion: reduce) { .rise { animation: none; } }
+/* ---- Motion & graphics ---- */
+.card.lit { background-image: radial-gradient(420px circle at var(--mx) var(--my), rgba(10,132,255,0.07), transparent 45%); }
+:root[data-dark="true"] .card.lit { background-image: radial-gradient(420px circle at var(--mx) var(--my), rgba(41,151,255,0.10), transparent 45%); }
+
+.aurora-blob { position: absolute; width: 46vmax; height: 46vmax; border-radius: 50%; filter: blur(90px); opacity: 0.22; animation: drift 22s ease-in-out infinite alternate; }
+:root[data-dark="true"] .aurora-blob { opacity: 0.30; }
+@keyframes drift { 0% { transform: translate(0,0) scale(1); } 50% { transform: translate(6vmax,4vmax) scale(1.12); } 100% { transform: translate(-4vmax,7vmax) scale(0.94); } }
+
+.orbit { animation: spin 18s linear infinite; }
+.orbit > span { animation: spin 18s linear infinite reverse; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.skeleton { border-radius: 20px; background: linear-gradient(100deg, var(--fill) 30%, var(--raised) 50%, var(--fill) 70%); background-size: 300% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+.shimmer { position: relative; overflow: hidden; }
+.shimmer::after { content: ''; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 20%, rgba(255,255,255,0.35) 50%, transparent 80%); background-size: 250% 100%; animation: shimmer 1.6s linear infinite; }
+@keyframes shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+
+.pulse-ring { position: relative; }
+.pulse-ring::before { content: ''; position: absolute; inset: 0; border-radius: 9999px; border: 2px solid var(--bad); animation: ring 1.8s ease-out infinite; pointer-events: none; }
+@keyframes ring { from { transform: scale(1); opacity: .7; } to { transform: scale(1.9); opacity: 0; } }
+
+.pop { animation: pop .45s cubic-bezier(.2,1.4,.4,1) backwards; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .pop, .aurora-blob, .orbit, .orbit > span, .skeleton, .shimmer::after, .pulse-ring::before { animation: none !important; }
+  .card.lit { background-image: none; }
+  * { transition-duration: 0.01ms !important; }
+}
 
 .recharts-cartesian-grid line { stroke: var(--grid); }
 .recharts-text { fill: var(--muted); font-size: 11px; }

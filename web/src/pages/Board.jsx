@@ -6,6 +6,7 @@ import { ResponsiveContainer, LineChart, Line } from 'recharts';
 import { fmtPct, useColors } from '../lib.js';
 import { useMeta } from '../ctx.js';
 import { ActivityList, whenText } from './Activities.jsx';
+import { stagger } from '../motion.jsx';
 
 const STAGES = ['Discovery', 'Project setup', 'First run', 'First report', 'Recommendations', 'Ongoing tracking'];
 export const money = (n, cur = 'EUR') => (n == null ? null : new Intl.NumberFormat('en-GB', { style: 'currency', currency: cur, maximumFractionDigits: 0 }).format(n));
@@ -26,7 +27,7 @@ export default function Board({ projects, reload }) {
               <p className="mt-0.5 text-[12px] text-muted tnum">{c.value ? `${money(c.value)}/mo · ` : ''}{c.items.length} client{c.items.length === 1 ? '' : 's'}</p>
             </header>
             <div className="flex flex-1 flex-col gap-2">
-              {c.items.map(p => <ClientCard key={p.id} p={p} reload={reload} />)}
+              {c.items.map((p, k) => <ClientCard key={p.id} p={p} reload={reload} i={c.i + k} />)}
               {!c.items.length && <div className="rounded-xl border-2 border-dashed px-3 py-6 text-center text-xs text-muted" style={{ borderColor: 'var(--line)' }}>No clients here</div>}
             </div>
           </section>
@@ -36,7 +37,7 @@ export default function Board({ projects, reload }) {
   );
 }
 
-function ClientCard({ p, reload }) {
+function ClientCard({ p, reload, i = 0 }) {
   const nav = useNavigate();
   const meta = useMeta();
   const c = useColors();
@@ -71,7 +72,7 @@ function ClientCard({ p, reload }) {
   return (
     <div ref={ref} className="relative">
       <article onClick={() => nav(`/p/${p.id}/journey`)} role="link" tabIndex={0} onKeyDown={e => e.key === 'Enter' && nav(`/p/${p.id}/journey`)}
-        className="card cursor-pointer p-3 transition-all duration-200 hover:-translate-y-px hover:shadow-lift">
+        style={stagger(i)} className="card rise cursor-pointer p-3 transition-all duration-200 hover:-translate-y-px hover:shadow-lift">
         <div className="mb-2 flex gap-1" aria-hidden>
           <span className="h-1 w-8 rounded-full" style={{ background: p.data_mode === 'live' ? 'var(--good)' : '#eda100' }} />
           <span className="h-1 w-5 rounded-full" style={{ background: c.brand({ operator: 1, platform: 7, studio: 5 }[p.category] || 9) }} />
@@ -83,7 +84,7 @@ function ClientCard({ p, reload }) {
           </div>
           <button onClick={e => { e.stopPropagation(); setOpen(o => !o); }} aria-label="Activities"
             title={status === 'overdue' ? 'An activity is overdue' : status === 'planned' ? 'Next activity is planned' : 'No activity planned'}
-            className={`grid h-6 w-6 shrink-0 place-items-center rounded-full transition-transform hover:scale-110 ${status === 'overdue' ? 'bg-bad text-white' : status === 'planned' ? 'bg-good text-white' : 'text-[#eda100]'}`}>
+            className={`grid h-6 w-6 shrink-0 place-items-center rounded-full transition-transform hover:scale-110 ${status === 'overdue' ? 'pulse-ring bg-bad text-white' : status === 'planned' ? 'bg-good text-white' : 'text-[#eda100]'}`}>
             {status === 'none' ? <AlertTriangle size={17} fill="currentColor" stroke="white" strokeWidth={2} /> : <ChevronRight size={15} strokeWidth={3} />}
           </button>
         </div>

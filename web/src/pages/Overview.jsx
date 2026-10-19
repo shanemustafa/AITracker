@@ -6,6 +6,7 @@ import { useMeta, useProject } from '../ctx.js';
 import { Card, Stat, Delta, Spinner, ErrorBox, SimBanner, Empty, Segmented, BrandDot, Bar, Sentiment, useToast } from '../ui.jsx';
 import { TrendChart, ShareOfVoiceChart, VisibilitySentimentMap, Legend, smooth } from '../charts.jsx';
 import FilterBar from './FilterBar.jsx';
+import { CountUp } from '../motion.jsx';
 
 export default function Overview() {
   const { project, reload } = useProject();
@@ -23,7 +24,7 @@ export default function Overview() {
   const colorOf = Object.fromEntries(s.brands.map(b => [b.id, b.color]));
 
   if (!s.totalAnswers) return <><FilterBar />{project.data_mode === 'live'
-    ? <Empty title="No real answers yet" action={<Link className="btn-primary" to="/settings">Connect an AI engine</Link>}>This client uses real AI answers. Connect at least one AI engine and set a monthly spending cap in Settings, then press "Run now" at the top. Results appear within minutes.</Empty>
+    ? <Empty art title="No real answers yet" action={<Link className="btn-primary" to="/settings">Connect an AI engine</Link>}>This client uses real AI answers. Connect at least one AI engine and set a monthly spending cap in Settings, then press "Run now" at the top. Results appear within minutes.</Empty>
     : <Empty title="No answers in this period yet" action={<Link className="btn-primary" to="../prompts">Check your questions</Link>}>Press "Run now" at the top to ask the AI engines your questions. Results appear here within minutes.</Empty>}</>;
 
   return (
@@ -31,13 +32,13 @@ export default function Overview() {
       <FilterBar />
       <div className="mb-4"><SimBanner show={s.simulatedAnswers > 0} /></div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label="Visibility" help="Share of AI answers that mention your brand at all." value={fmtPct(own?.visibility)}
+        <Stat i={0} label="Visibility" help="Share of AI answers that mention your brand at all." value={<CountUp value={own?.visibility} format={fmtPct} />}
           delta={<Delta now={own?.visibility} before={own?.prev?.visibility} />} sub={`of ${s.totalAnswers} answers`} />
-        <Stat label="Position" help="Average rank when you are mentioned. 1 = named first. Lower is better." value={fmtPos(own?.position)}
+        <Stat i={1} label="Position" help="Average rank when you are mentioned. 1 = named first. Lower is better." value={<CountUp value={own?.position} format={fmtPos} />}
           delta={<Delta now={own?.position} before={own?.prev?.position} invert unit="" />} />
-        <Stat label="Sentiment" help="Tone of the sentences that mention you: 0 = very negative, 50 = neutral, 100 = very positive." value={<Sentiment value={own?.sentiment} />}
+        <Stat i={2} label="Sentiment" help="Tone of the sentences that mention you: 0 = very negative, 50 = neutral, 100 = very positive." value={<CountUp value={own?.sentiment} format={v => <Sentiment value={v} />} />}
           delta={<Delta now={own?.sentiment} before={own?.prev?.sentiment} digits={0} />} />
-        <Stat label="Share of voice" help="Your mentions as a share of all mentions of tracked brands." value={fmtPct(own?.sov)}
+        <Stat i={3} label="Share of voice" help="Your mentions as a share of all mentions of tracked brands." value={<CountUp value={own?.sov} format={fmtPct} />}
           delta={<Delta now={own?.sov} before={own?.prev?.sov} />} sub={`rank #${own?.rank} of ${s.brands.length}`} />
       </div>
       <p className="mt-2 text-xs text-muted">Changes compare with the previous {f.days} days.</p>

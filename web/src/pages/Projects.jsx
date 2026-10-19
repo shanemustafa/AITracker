@@ -5,6 +5,7 @@ import Board, { money } from './Board.jsx';
 import { useApi, fmtPct, fmtPos, fmtDate } from '../lib.js';
 import { useMeta, useUser } from '../ctx.js';
 import { PageHeader, Spinner, ErrorBox, SimBadge, Badge, Empty, Sentiment, Segmented } from '../ui.jsx';
+import { stagger, Skeleton } from '../motion.jsx';
 
 const STAGES = ['Discovery', 'Setup', 'First run', 'First report', 'Actions', 'Tracking'];
 
@@ -35,7 +36,7 @@ export default function Projects() {
   const [view, setViewState] = useState(() => { try { return localStorage.getItem('clientsView') || 'board'; } catch { return 'board'; } });
   const setView = v => { setViewState(v); try { localStorage.setItem('clientsView', v); } catch { /* private mode */ } };
   if (error) return <ErrorBox error={error} />;
-  if (!data) return <Spinner />;
+  if (!data) return <Skeleton rows={1} />;
   const total = data.reduce((s, p) => s + (p.fee || 0), 0);
   return (
     <>
@@ -52,10 +53,10 @@ export default function Projects() {
         <span><strong>Finish your legal pages.</strong> Add your company name, business ID and contact email so the Privacy policy and Terms are complete.</span>
         <Link to="/settings#company" className="btn-ghost btn-sm">Add company details</Link></div>}
       {view === 'board' && data.length > 0 && <Board projects={data} reload={reload} />}
-      {!data.length && <Empty title="No projects yet" action={<Link to="/new" className="btn-primary">Start the guided setup</Link>}>Create your first client project. It takes about two minutes.</Empty>}
+      {!data.length && <Empty art title="No clients yet" action={<Link to="/new" className="btn-primary">Start the guided setup</Link>}>Create your first client project. It takes about two minutes.</Empty>}
       {view === 'cards' && <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {data.map(p => (
-          <Link key={p.id} to={`/p/${p.id}/journey`} className="card rise group flex flex-col p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift">
+        {data.map((p, i) => (
+          <Link key={p.id} to={`/p/${p.id}/journey`} style={stagger(i)} className="card rise group flex flex-col p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lift">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <div className="truncate text-[17px] font-semibold tracking-title">{p.name}</div>

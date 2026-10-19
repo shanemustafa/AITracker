@@ -3,21 +3,19 @@ import { useParams } from 'react-router-dom';
 import { api } from '../lib.js';
 import { ErrorBox } from '../ui.jsx';
 import { LegalLinks } from './Legal.jsx';
+import { Aurora, Logo } from '../motion.jsx';
 
 function Frame({ title, subtitle, children }) {
   return (
     <div className="relative grid min-h-screen place-items-center overflow-hidden px-4">
-      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full opacity-40 blur-3xl"
-        style={{ background: 'radial-gradient(closest-side, #0a84ff55, #5e5ce633, transparent)' }} />
+      <Aurora />
       <div className="rise relative w-full max-w-[400px]">
         <div className="mb-8 flex flex-col items-center text-center">
-          <span className="grid h-14 w-14 place-items-center rounded-[16px] shadow-lift" style={{ background: 'linear-gradient(135deg, #0a84ff, #5e5ce6)' }}>
-            <svg width="28" height="28" viewBox="0 0 32 32"><path d="M6 23l6-8 5 5 9-12" stroke="white" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </span>
+          <span className="pop"><Logo size={64} draw /></span>
           <h1 className="mt-6 text-[32px] font-bold leading-tight tracking-display">{title}</h1>
           {subtitle && <p className="mt-2 text-[15px] text-muted">{subtitle}</p>}
         </div>
-        <div className="card p-7 shadow-lift">{children}</div>
+        <div className="card glass p-7 shadow-lift">{children}</div>
         <p className="mt-6 text-center text-xs text-muted">AI Answer Tracker measures what AI assistants say about brands.<br />It never tries to change it.</p>
         <LegalLinks className="mt-4 flex flex-col items-center text-center" />
       </div>

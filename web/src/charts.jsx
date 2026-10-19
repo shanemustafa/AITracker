@@ -3,6 +3,10 @@ import {
   ScatterChart, Scatter, ZAxis, ReferenceLine, LabelList, BarChart, Bar as RBar,
 } from 'recharts';
 import { useColors, fmtDate } from './lib.js';
+import { useReducedMotion } from 'framer-motion';
+
+// Charts draw themselves in, unless the device asks for reduced motion.
+const useAnim = () => { const reduce = useReducedMotion(); return reduce ? { isAnimationActive: false } : { isAnimationActive: true, animationDuration: 900, animationEasing: 'ease-out' }; };
 import { BrandDot } from './ui.jsx';
 
 const shortDay = d => new Date(d + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
@@ -51,6 +55,7 @@ export function smooth(series, keys, window = 7) {
 
 export function TrendChart({ data, brands, prefix = 'v', hidden = new Set(), height = 260, unit = '%', domain = [0, 'auto'] }) {
   const c = useColors();
+  const anim = useAnim();
   return (
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: -12 }}>
@@ -60,7 +65,7 @@ export function TrendChart({ data, brands, prefix = 'v', hidden = new Set(), hei
         <Tooltip content={<TipBox brands={brands} unit={unit} />} cursor={{ stroke: c.axis, strokeWidth: 1 }} />
         {brands.filter(b => !hidden.has(b.id)).map(b => (
           <Line key={b.id} type="monotone" dataKey={`${prefix}_${b.id}`} stroke={c.brand(b.color)} strokeWidth={b.is_own ? 2.5 : 1.75}
-            dot={false} activeDot={{ r: 4, strokeWidth: 2, stroke: c.surface }} connectNulls isAnimationActive={false} />
+            dot={false} activeDot={{ r: 4, strokeWidth: 2, stroke: c.surface }} connectNulls {...anim} />
         ))}
       </LineChart>
     </ResponsiveContainer>
@@ -69,6 +74,7 @@ export function TrendChart({ data, brands, prefix = 'v', hidden = new Set(), hei
 
 export function ShareOfVoiceChart({ data, brands, hidden = new Set(), height = 260 }) {
   const c = useColors();
+  const anim = useAnim();
   const visible = brands.filter(b => !hidden.has(b.id));
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -79,7 +85,7 @@ export function ShareOfVoiceChart({ data, brands, hidden = new Set(), height = 2
         <Tooltip content={<TipBox brands={brands} />} cursor={{ stroke: c.axis }} />
         {visible.map(b => (
           <Area key={b.id} type="monotone" dataKey={`s_${b.id}`} stackId="1" stroke={c.surface} strokeWidth={1.5}
-            fill={c.brand(b.color)} fillOpacity={b.is_own ? 0.95 : 0.8} isAnimationActive={false} />
+            fill={c.brand(b.color)} fillOpacity={b.is_own ? 0.95 : 0.8} {...anim} />
         ))}
       </AreaChart>
     </ResponsiveContainer>
@@ -133,6 +139,7 @@ export function VisibilitySentimentMap({ brands, height = 280 }) {
 
 export function HBars({ rows, valueKey = 'value', labelKey = 'label', unit = '%', slot = 1, height }) {
   const c = useColors();
+  const anim = useAnim();
   return (
     <ResponsiveContainer width="100%" height={height || Math.max(120, rows.length * 34)}>
       <BarChart data={rows} layout="vertical" margin={{ top: 0, right: 40, bottom: 0, left: 0 }} barCategoryGap={8}>
@@ -140,7 +147,7 @@ export function HBars({ rows, valueKey = 'value', labelKey = 'label', unit = '%'
         <YAxis type="category" dataKey={labelKey} width={180} tick={{ fill: c.muted, fontSize: 12 }} axisLine={false} tickLine={false} />
         <Tooltip cursor={{ fill: c.grid, opacity: 0.4 }} content={({ active, payload }) => active && payload?.[0] ? (
           <div className="glass rounded-xl px-3.5 py-2.5 text-xs shadow-lift"><span className="text-ink">{payload[0].payload[labelKey]}: </span><span className="tnum">{payload[0].value}{unit}</span></div>) : null} />
-        <RBar dataKey={valueKey} fill={c.brand(slot)} radius={[0, 4, 4, 0]} isAnimationActive={false}>
+        <RBar dataKey={valueKey} fill={c.brand(slot)} radius={[0, 4, 4, 0]} {...anim}>
           <LabelList dataKey={valueKey} position="right" formatter={v => `${v}${unit}`} style={{ fill: c.ink, fontSize: 11 }} />
         </RBar>
       </BarChart>
