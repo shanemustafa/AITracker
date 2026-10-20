@@ -5,7 +5,7 @@ import { Logo, PageIn, Skeleton } from './motion.jsx';
 import { Routes, Route, Navigate, NavLink, Outlet, useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, MessageSquareText, Link2, Users, ListChecks, FileText, Settings, Plus, FolderKanban,
-  Sun, Moon, Monitor, LogOut, Play, Loader2, Download, Route as RouteIcon, ClipboardList, Lightbulb, Menu, X,
+  Sun, Moon, Monitor, LogOut, Inbox, Globe, Play, Loader2, Download, Route as RouteIcon, ClipboardList, Lightbulb, Menu, X,
 } from 'lucide-react';
 import { api, useApi, setTheme, useDark, useFilters, fmtDate, PREVIEW } from './lib.js';
 import { Spinner, SimBadge, Badge, ErrorBox, useToast, Segmented } from './ui.jsx';
@@ -24,6 +24,8 @@ import Actions from './pages/Actions.jsx';
 import Reports, { ReportView } from './pages/Reports.jsx';
 import ProjectSettings from './pages/ProjectSettings.jsx';
 import SettingsPage from './pages/Settings.jsx';
+import Home from './pages/Home.jsx';
+import Enquiries from './pages/Enquiries.jsx';
 
 
 export default function App() {
@@ -34,6 +36,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={auth.needsSetup ? <Navigate to="/setup" /> : <Login />} />
+      <Route path="/website" element={<Home signedIn={!!auth.user} />} />
       <Route path="/reset" element={<Reset />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
@@ -41,7 +44,7 @@ export default function App() {
       <Route path="/setup" element={auth.needsSetup ? <Setup codeRequired={auth.setupCodeRequired} /> : <Navigate to="/login" />} />
       <Route path="/invite/:token" element={<Invite />} />
       <Route path="/p/:id/reports/:rid/print" element={auth.user ? <Authed user={auth.user} bare><ReportView print /></Authed> : <Navigate to="/login" />} />
-      <Route path="*" element={auth.user ? <Authed user={auth.user} /> : <Navigate to={auth.needsSetup ? '/setup' : '/login'} />} />
+      <Route path="*" element={auth.user ? <Authed user={auth.user} /> : loc.pathname === '/' && !auth.needsSetup ? <Home /> : <Navigate to={auth.needsSetup ? '/setup' : '/login'} />} />
     </Routes>
   );
 }
@@ -58,6 +61,7 @@ function Authed({ user, bare, children }) {
               <Route path="/" element={<Projects />} />
               <Route path="/new" element={<Quickstart />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/enquiries" element={<Enquiries />} />
               <Route path="/p/:id" element={<ProjectLayout />}>
                 <Route index element={<Navigate to="journey" replace />} />
                 <Route path="journey" element={<Journey />} />
@@ -98,6 +102,8 @@ function Shell({ user }) {
   const nav = useNavigate();
   const { id } = useParams();
   const projects = useApi('/projects');
+  const enquiries = useApi('/enquiries');
+  const newEnquiries = enquiries.data?.filter(e => e.status === 'new').length || 0;
   const [open, setOpen] = useState(false);
   const loc = useLocation();
   useEffect(() => setOpen(false), [loc.pathname]);
@@ -138,6 +144,8 @@ function Shell({ user }) {
       <div className="mt-auto flex flex-col gap-0.5 pt-3" style={{ borderTop: '1px solid var(--line)' }}>
         <NavItem to="/" end icon={FolderKanban} label="Clients" />
         <NavItem to="/new" icon={Plus} label="New client" />
+        <NavItem to="/enquiries" icon={Inbox} label="Enquiries" count={newEnquiries} />
+        <NavItem to="/website" icon={Globe} label="Website" />
         <NavItem to="/settings" icon={Settings} label="Settings" />
         <div className="mt-2 flex items-center justify-between px-1">
           <ThemeSwitch />
@@ -176,12 +184,13 @@ function Shell({ user }) {
 }
 
 // Menu item; the grey highlight slides to the page you open.
-function NavItem({ to, icon: Icon, label, end }) {
+function NavItem({ to, icon: Icon, label, end, count }) {
   return (
     <NavLink to={to} end={end} className="navlink relative">
       {({ isActive }) => <>
         {isActive && <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-lg bg-fill" transition={{ type: 'spring', stiffness: 500, damping: 40 }} />}
         <Icon size={15} className="relative" /><span className="relative">{label}</span>
+        {count > 0 && <span className="relative ml-auto rounded-full bg-accent px-1.5 text-[11px] font-semibold text-white">{count}</span>}
       </>}
     </NavLink>
   );

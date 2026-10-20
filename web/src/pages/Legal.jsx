@@ -57,7 +57,7 @@ export function Privacy() {
   const c = d?.company || {};
   return (
     <Page title="Privacy policy" d={d}>
-      <p>This policy explains what personal data <strong><F v={c.name} label="Company name" /></strong> ("we") handles in AI Answer Tracker (the "Service"), why, and what your rights are. The Service is a private business tool: it measures how AI assistants describe companies and brands.</p>
+      <p>This policy explains what personal data <strong><F v={c.name} label="Company name" /></strong> ("we") handles in AI Answer Tracker (the "Service"), why, and what your rights are. The Service is a business tool that measures how AI assistants describe companies and brands. This policy also covers our public website and its contact form.</p>
 
       <h2>1. Who is responsible</h2>
       <p>The data controller is <F v={c.name} label="Company name" />, business ID <F v={c.businessId} label="Business ID (Y-tunnus)" />, <F v={c.address} label="Street address, postcode and city" />, <F v={c.country} label="Country" />. Contact us about privacy at <F v={c.email} label="Contact email" />.</p>
@@ -65,6 +65,7 @@ export function Privacy() {
       <h2>2. What data we handle</h2>
       <ul>
         <li><strong>Account details:</strong> name, email address, role (admin or member) and your password, which we store only in a scrambled (hashed) form that cannot be turned back into the password.</li>
+        <li><strong>Website enquiries:</strong> if you use the contact form on our website, the name, work email, company, role, markets and message you send us.</li>
         <li><strong>Sign-in cookie:</strong> one cookie that keeps you signed in (see section 7).</li>
         <li><strong>Work content you enter:</strong> client project names, discovery notes, activities, fees and comments. These may contain names or job titles of business contacts if you type them in.</li>
         <li><strong>Technical logs:</strong> our hosting provider records technical information such as IP addresses and request times to run and protect the Service.</li>
@@ -74,6 +75,7 @@ export function Privacy() {
       <h2>3. Why we use it, and on what legal basis</h2>
       <ul>
         <li>To provide the Service to you and your organisation — performance of a contract (GDPR Art. 6(1)(b)).</li>
+        <li>To answer enquiries sent through our website and discuss a possible agreement with you: steps taken at your request before a contract (Art. 6(1)(b)) and our legitimate interest in replying to business enquiries (Art. 6(1)(f)).</li>
         <li>To keep the Service secure, prevent misuse and fix problems — our legitimate interest (Art. 6(1)(f)).</li>
         <li>To keep records the law requires, such as accounting records — legal obligation (Art. 6(1)(c)).</li>
       </ul>
@@ -91,6 +93,7 @@ export function Privacy() {
       <ul>
         <li>Account details: while the account exists. An admin can remove a user at any time; the details are then deleted from the live database straight away.</li>
         <li>Work content: while your organisation uses the Service, and up to 90 days after it stops, unless you ask us to delete it sooner.</li>
+        <li>Website enquiries: up to 12 months after our last contact, unless you become a client or ask us to delete them sooner.</li>
         <li>Backups: the Service keeps rolling backups (normally the 20 most recent, about three weeks). Deleted data disappears from backups as they are replaced.</li>
         <li>Technical logs: as long as the hosting provider keeps them, normally a few weeks.</li>
       </ul>
@@ -102,7 +105,7 @@ export function Privacy() {
       <p>The Service uses <strong>one strictly necessary cookie</strong>, called <code>sid</code>, which keeps you signed in for up to 30 days. It is required for the Service to work, so no consent banner is needed. We use <strong>no</strong> analytics, advertising or tracking cookies, and load no third-party fonts or scripts. Your light/dark display choice is stored only in your own browser.</p>
 
       <h2>8. Security</h2>
-      <p>All traffic is encrypted (HTTPS). Passwords are hashed. Pages require a sign-in, settings can only be changed by admins, and data is backed up daily. AI provider keys are stored on the server and never shown in full.</p>
+      <p>All traffic is encrypted (HTTPS). Passwords are hashed. App pages require a sign-in, settings can only be changed by admins, and data is backed up daily. AI provider keys are stored on the server and never shown in full.</p>
 
       <h2>9. Changes</h2>
       <p>If we change this policy, we update the date at the top. Important changes will be announced in the Service.</p>

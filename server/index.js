@@ -51,7 +51,34 @@ const mode = () => getSetting('mode', 'demo');
 // ---------- Company & legal details (public, shown on the legal pages) ----------
 const COMPANY_FIELDS = ['name', 'businessId', 'vatId', 'address', 'country', 'email', 'phone', 'website', 'representative'];
 const company = () => ({ ...Object.fromEntries(COMPANY_FIELDS.map(k => [k, ''])), country: 'Finland', ...getSetting('company', {}) });
-app.get('/api/legal', wrap(() => ({ company: company(), updated: getSetting('legal_updated', '2026-10-18'), hostingRegion: getSetting('hosting_region', 'United States') })));
+app.get('/api/legal', wrap(() => ({ company: company(), updated: [getSetting('legal_updated', ''), '2026-10-20'].sort().pop(), hostingRegion: getSetting('hosting_region', 'United States') })));
+
+// ---------- Website contact form ----------
+// Public: anyone can send an enquiry from the website. Limited per IP; a hidden "website" field catches bots.
+const enquiryTries = new Map(); // ip -> [timestamps]
+app.post('/api/enquiries/new', wrap(req => {
+  const b = req.body || {};
+  if (b.website) return { ok: true }; // bot filled the hidden field: pretend it worked, store nothing
+  const ip = req.ip || 'unknown';
+  const recent = (enquiryTries.get(ip) || []).filter(t => Date.now() - t < 60 * 60 * 1000);
+  if (recent.length >= 5) throw Object.assign(new Error('Too many messages from this connection. Please try again in an hour.'), { status: 429 });
+  const clean = (v, max) => String(v ?? '').trim().slice(0, max);
+  const e = { name: clean(b.name, 120), email: clean(b.email, 200).toLowerCase(), company: clean(b.company, 160), role: clean(b.role, 40), markets: clean(b.markets, 200), message: clean(b.message, 3000) };
+  if (!e.name) throw new Error('Please tell us your name.');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.email)) throw new Error('Please enter a valid work email.');
+  if (!e.company) throw new Error('Please tell us your company.');
+  if (!b.consent) throw new Error('Please tick the box to agree to the privacy policy.');
+  enquiryTries.set(ip, [...recent, Date.now()]);
+  run('INSERT INTO enquiries (name, email, company, role, markets, message) VALUES (?,?,?,?,?,?)', e.name, e.email, e.company, e.role, e.markets, e.message);
+  return { ok: true };
+}));
+app.get('/api/enquiries', wrap(() => all('SELECT * FROM enquiries ORDER BY id DESC')));
+app.patch('/api/enquiries/:id', wrap(req => {
+  if (!['new', 'contacted', 'won', 'closed'].includes(req.body.status)) throw new Error('Unknown status');
+  run('UPDATE enquiries SET status = ? WHERE id = ?', req.body.status, Number(req.params.id));
+  return { ok: true };
+}));
+app.delete('/api/enquiries/:id', requireAdmin, wrap(req => { run('DELETE FROM enquiries WHERE id = ?', Number(req.params.id)); return { ok: true }; }));
 
 // ---------- Reference data ----------
 app.get('/api/meta', wrap(() => ({

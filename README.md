@@ -20,6 +20,7 @@ It **measures and advises**. It never tries to change what AI models say, never 
 - **Team**: logins, invite links, admin/member roles.
 - **Daily automatic runs** plus a "Run now" button, a **monthly spending cap**, and automatic backups.
 - Apple-style design: system font, large titles, frosted-glass menus, light and dark mode.
+- **Public website** at `/` for visitors (the app is behind **Sign in**): what the service does, how it works, FAQ and a contact form. Messages land in **Enquiries** inside the app. No invented customers, quotes or numbers; the product picture is a labelled illustration.
 - **Legal pages**: Privacy policy, Terms of use and Legal notice (public), filled from Settings → Company & legal. No tracking cookies, no third-party fonts or scripts, security headers, hidden from search engines.
 
 ## Engines

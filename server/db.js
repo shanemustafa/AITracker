@@ -87,6 +87,10 @@ CREATE TABLE IF NOT EXISTS activities (
   type TEXT NOT NULL DEFAULT 'task', title TEXT NOT NULL, due_at TEXT, done_at TEXT, note TEXT,
   created_by INTEGER, created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS enquiries (
+  id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, company TEXT, role TEXT, markets TEXT, message TEXT,
+  status TEXT NOT NULL DEFAULT 'new', created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 CREATE INDEX IF NOT EXISTS idx_activities_proj ON activities(project_id, done_at, due_at);
 CREATE INDEX IF NOT EXISTS idx_answers_proj_day ON answers(project_id, day);
 CREATE INDEX IF NOT EXISTS idx_answers_prompt ON answers(prompt_id);
