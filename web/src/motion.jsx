@@ -29,20 +29,26 @@ export function PageIn({ children }) {
   );
 }
 
-// The app's mark: an answer bubble with a rising line. `draw` animates the line being drawn.
-export function Logo({ size = 32, draw = false, radius }) {
+// The app's mark ("Chorus"): four overlapping speech bubbles, one per AI service, in a round badge.
+// Where they overlap the colours add up and glow brighter. `draw` makes the bubbles pop in one by one.
+const BUBBLES = [[25, 25, '#0a84ff'], [39, 25, '#bf5af2'], [25, 39, '#30d158'], [39, 39, '#ff9f0a']];
+export function Logo({ size = 32, draw = false }) {
   const reduce = useReducedMotion();
-  const animateLine = draw && !reduce;
+  const pop = draw && !reduce;
+  const spring = i => ({ delay: 0.15 + i * 0.12, type: 'spring', stiffness: 420, damping: 16 });
   return (
-    <span className="relative inline-grid shrink-0 place-items-center overflow-hidden text-white shadow-thumb"
-      style={{ width: size, height: size, borderRadius: radius ?? size * 0.29, background: 'linear-gradient(140deg, #0a84ff 0%, #5e5ce6 55%, #bf5af2 100%)' }} aria-hidden>
-      <span className="absolute inset-0" style={{ background: 'radial-gradient(120% 80% at 20% 0%, rgba(255,255,255,.35), transparent 55%)' }} />
-      <svg width={size * 0.62} height={size * 0.62} viewBox="0 0 32 32" fill="none" className="relative">
-        <path d="M6 6.5h20a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3H14l-5.5 4.5V23.5H6a3 3 0 0 1-3-3v-11a3 3 0 0 1 3-3Z" stroke="white" strokeOpacity=".55" strokeWidth="2" strokeLinejoin="round" />
-        <motion.path d="M8.5 19l4.5-5 3.5 3.5 6.5-7" stroke="white" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"
-          initial={animateLine ? { pathLength: 0 } : false} animate={{ pathLength: 1 }} transition={{ duration: 1.1, delay: 0.25, ease: EASE }} />
-        <motion.circle cx="23" cy="10.5" r="1.9" fill="white"
-          initial={animateLine ? { scale: 0, opacity: 0 } : false} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 1.2, type: 'spring', stiffness: 380, damping: 14 }} />
+    <span className="relative inline-block shrink-0 rounded-full shadow-thumb" style={{ width: size, height: size }} aria-hidden>
+      <svg width={size} height={size} viewBox="0 0 64 64" className="block">
+        <circle cx="32" cy="32" r="32" fill="#101014" />
+        <circle cx="32" cy="32" r="31.5" fill="none" stroke="#fff" strokeOpacity=".12" />
+        <g transform="translate(3.2 3.2) scale(0.9)" style={{ isolation: 'isolate' }}>
+          {BUBBLES.map(([cx, cy, c], i) => (
+            <motion.circle key={c} cx={cx} cy={cy} r="12.5" fill={c} style={{ mixBlendMode: 'screen', transformOrigin: `${cx}px ${cy}px` }}
+              initial={pop ? { scale: 0, opacity: 0 } : false} animate={{ scale: 1, opacity: 1 }} transition={spring(i)} />
+          ))}
+          <motion.path d="M15 45 L12 53.5 L21 49 Z" fill="#30d158" style={{ mixBlendMode: 'screen' }}
+            initial={pop ? { opacity: 0 } : false} animate={{ opacity: 1 }} transition={{ delay: 0.75, duration: 0.3 }} />
+        </g>
       </svg>
     </span>
   );
