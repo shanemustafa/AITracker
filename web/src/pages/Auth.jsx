@@ -16,7 +16,7 @@ function Frame({ title, subtitle, children }) {
           {subtitle && <p className="mt-2 text-[15px] text-muted">{subtitle}</p>}
         </div>
         <div className="card glass p-7 shadow-lift">{children}</div>
-        <p className="mt-6 text-center text-xs text-muted">AI Answer Tracker measures what AI assistants say about brands.<br />It never tries to change it.</p>
+        <p className="mt-6 text-center text-xs text-muted">Housedge measures what AI assistants say about brands.<br />It never tries to change it.</p>
         <LegalLinks className="mt-4 flex flex-col items-center text-center" />
       </div>
     </div>
@@ -48,7 +48,7 @@ function Form({ fields, submit, button }) {
 
 export function Login() {
   return (
-    <Frame title="Sign in" subtitle="Welcome back to AI Answer Tracker.">
+    <Frame title="Sign in" subtitle="Welcome back to Housedge.">
       <Form button="Sign in" submit={v => api('/auth/login', { method: 'POST', body: v })} fields={[
         { name: 'email', label: 'Email', type: 'email', auto: 'email' },
         { name: 'password', label: 'Password', type: 'password', auto: 'current-password' },

@@ -8,10 +8,10 @@ import { Card, PageHeader, Spinner, ErrorBox, Badge, Segmented, useToast, Modal,
 const TABS = [['engines', 'AI engines'], ['costs', 'Costs & limits'], ['team', 'Team'], ['api', 'API & exports'], ['company', 'Company & legal'], ['data', 'Mode & backups']];
 
 const KEY_HELP = {
-  chatgpt: { site: 'https://platform.openai.com/api-keys', steps: ['Go to platform.openai.com and sign up or log in.', 'Click Settings (gear) → Billing → add a payment card and buy $10 of credit.', 'Click API keys → "Create new secret key" → name it "AI Tracker" → Create.', 'Copy the key (starts with sk-) and paste it here. You can only see it once.'] },
+  chatgpt: { site: 'https://platform.openai.com/api-keys', steps: ['Go to platform.openai.com and sign up or log in.', 'Click Settings (gear) → Billing → add a payment card and buy $10 of credit.', 'Click API keys → "Create new secret key" → name it "Housedge" → Create.', 'Copy the key (starts with sk-) and paste it here. You can only see it once.'] },
   gemini: { site: 'https://aistudio.google.com/apikey', steps: ['Go to aistudio.google.com and log in with a Google account.', 'Click "Get API key" → "Create API key" → pick or create a Google Cloud project.', 'To go beyond the free tier, click "Set up billing" next to the key and add a card.', 'Copy the key (starts with AIza) and paste it here.'] },
   perplexity: { site: 'https://www.perplexity.ai/account/api', steps: ['Go to perplexity.ai, log in, then open Settings → API (perplexity.ai/account/api).', 'Add a payment method and buy credit (e.g. $10).', 'Click "Generate API key" (or "Create key").', 'Copy the key (starts with pplx-) and paste it here.'] },
-  claude: { site: 'https://console.anthropic.com/settings/keys', steps: ['Go to console.anthropic.com and sign up or log in.', 'Open Settings → Billing and buy credit (e.g. $10).', 'Open Settings → API keys → "Create key", name it "AI Tracker".', 'Copy the key (starts with sk-ant-) and paste it here.'] },
+  claude: { site: 'https://console.anthropic.com/settings/keys', steps: ['Go to console.anthropic.com and sign up or log in.', 'Open Settings → Billing and buy credit (e.g. $10).', 'Open Settings → API keys → "Create key", name it "Housedge".', 'Copy the key (starts with sk-ant-) and paste it here.'] },
 };
 
 export default function SettingsPage() {

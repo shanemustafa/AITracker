@@ -59,7 +59,7 @@ function Header({ signedIn }) {
   return (
     <header className="glass sticky top-0 z-40 border-b border-line">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <a href="#top" className="flex items-center gap-2.5 font-semibold tracking-title"><Logo size={28} />AI Answer Tracker</a>
+        <a href="#top" className="flex items-center gap-2.5 font-semibold tracking-title"><Logo size={28} />Housedge</a>
         <nav className="hidden items-center gap-7 text-[13px] text-ink2 md:flex">
           {links.map(([h, l]) => <a key={h} href={h} className="transition-colors hover:text-ink">{l}</a>)}
         </nav>
@@ -123,7 +123,7 @@ function ProductPicture() {
       <div className="card overflow-hidden shadow-lift">
         <div className="flex items-center gap-1.5 border-b border-line bg-raised px-4 py-3">
           {['#ff5f57', '#febc2e', '#28c840'].map(c => <span key={c} className="h-3 w-3 rounded-full" style={{ background: c }} />)}
-          <span className="ml-3 text-xs text-muted">AI Answer Tracker · Finland · last 30 days</span>
+          <span className="ml-3 text-xs text-muted">Housedge · Finland · last 30 days</span>
         </div>
         <div className="grid gap-0 md:grid-cols-[1.1fr_1fr]">
           <div className="border-b border-line p-5 sm:p-7 md:border-b-0 md:border-r">
@@ -418,7 +418,7 @@ function Footer({ signedIn }) {
   return (
     <footer className="border-t border-line">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-10 sm:flex-row sm:px-6">
-        <div className="flex items-center gap-2.5 text-[13px] text-ink2"><Logo size={22} />AI Answer Tracker measures what AI says about brands. It never tries to change it.</div>
+        <div className="flex items-center gap-2.5 text-[13px] text-ink2"><Logo size={22} /><span><strong className="text-ink">Housedge.</strong> Give your brand the house edge in AI answers.</span></div>
         <div className="flex items-center gap-4 text-[13px]">
           <Link to={signedIn ? '/' : '/login'} className="text-ink2 hover:text-ink">{signedIn ? 'Open the app' : 'Sign in'}</Link>
         </div>

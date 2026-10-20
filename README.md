@@ -1,4 +1,6 @@
-# AI Answer Tracker
+# Housedge
+
+*Give your brand the house edge in AI answers.*
 
 Tracks how AI assistants (ChatGPT, Gemini, Perplexity, Claude) talk about iGaming brands. Think "Google Analytics, but for what AI says about a brand".
 

@@ -500,4 +500,4 @@ if (!process.env.NO_SCHEDULER) startScheduler();
 setInterval(() => { try { backup('daily'); } catch (e) { console.error('Backup failed', e); } }, 24 * 3600 * 1000);
 
 const port = Number(process.env.PORT) || 3000;
-app.listen(port, () => console.log(`AI Answer Tracker running on http://localhost:${port}`));
+app.listen(port, () => console.log(`Housedge running on http://localhost:${port}`));

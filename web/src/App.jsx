@@ -127,7 +127,7 @@ function Shell({ user }) {
     <div className="flex h-full flex-col gap-5 px-3 py-5">
       <Link to="/" className="flex items-center gap-2.5 px-2">
         <Logo size={32} />
-        <span className="text-[15px] font-semibold tracking-title">AI Answer Tracker</span>
+        <span className="text-[15px] font-semibold tracking-title">Housedge</span>
       </Link>
       {meta.mode === 'demo' ? <Link to="/settings" className="mx-1"><Badge tone="warn" className="w-full justify-center py-1.5">Demo mode · simulated answers</Badge></Link>
         : <Badge tone="good" className="mx-1 justify-center py-1.5">Live mode · real AI answers</Badge>}
@@ -161,7 +161,7 @@ function Shell({ user }) {
     <div className="min-h-screen md:flex">
       <aside className="glass no-print hidden md:block w-64 shrink-0 sticky top-0 h-screen overflow-y-auto" style={{ borderRight: '1px solid var(--line)' }}>{sidebar}</aside>
       <div className="glass no-print md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--line)' }}>
-        <span className="flex items-center gap-2 text-sm font-semibold"><Logo size={24} />AI Answer Tracker</span>
+        <span className="flex items-center gap-2 text-sm font-semibold"><Logo size={24} />Housedge</span>
         <button onClick={() => setOpen(true)} aria-label="Open menu"><Menu size={18} /></button>
       </div>
       {open && (

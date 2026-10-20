@@ -14,7 +14,7 @@ export function LegalLinks({ className = '' }) {
         <Link to="/terms" className="hover:text-ink hover:underline">Terms</Link>
         <Link to="/legal" className="hover:text-ink hover:underline">Legal notice</Link>
       </div>
-      <div className="mt-1">© {new Date().getFullYear()} {c?.name || 'AI Answer Tracker'}</div>
+      <div className="mt-1">© {new Date().getFullYear()} {c?.name || 'Housedge'}</div>
     </div>
   );
 }
@@ -34,7 +34,7 @@ function Page({ title, children, d }) {
     <div className="min-h-screen bg-page">
       <header className="glass sticky top-0 z-10" style={{ borderBottom: '1px solid var(--line)' }}>
         <div className="mx-auto flex max-w-3xl items-center justify-between px-5 py-3">
-          <Link to="/" className="inline-flex items-center gap-2 text-[13px] text-ink2 hover:text-ink"><ArrowLeft size={14} />AI Answer Tracker</Link>
+          <Link to="/" className="inline-flex items-center gap-2 text-[13px] text-ink2 hover:text-ink"><ArrowLeft size={14} />Housedge</Link>
           <nav className="flex gap-1 text-[13px]">
             {[['/privacy', 'Privacy'], ['/terms', 'Terms'], ['/legal', 'Legal notice']].map(([to, l]) => (
               <NavLink key={to} to={to} className={({ isActive }) => `rounded-full px-3 py-1 ${isActive ? 'bg-fill font-semibold text-ink' : 'text-ink2 hover:text-ink'}`}>{l}</NavLink>
@@ -46,7 +46,7 @@ function Page({ title, children, d }) {
         <h1 className="text-[34px] font-bold tracking-display">{title}</h1>
         {d?.updated && <p className="mt-2 text-sm text-muted">Last updated {fmtDate(d.updated)}</p>}
         <article className="legal card rise mt-8 p-7 md:p-10">{d ? children : <p className="text-muted">Loading…</p>}</article>
-        <p className="mt-6 text-center text-xs text-muted">© {new Date().getFullYear()} {d?.company?.name || 'AI Answer Tracker'}</p>
+        <p className="mt-6 text-center text-xs text-muted">© {new Date().getFullYear()} {d?.company?.name || 'Housedge'}</p>
       </main>
     </div>
   );
@@ -57,7 +57,7 @@ export function Privacy() {
   const c = d?.company || {};
   return (
     <Page title="Privacy policy" d={d}>
-      <p>This policy explains what personal data <strong><F v={c.name} label="Company name" /></strong> ("we") handles in AI Answer Tracker (the "Service"), why, and what your rights are. The Service is a business tool that measures how AI assistants describe companies and brands. This policy also covers our public website and its contact form.</p>
+      <p>This policy explains what personal data <strong><F v={c.name} label="Company name" /></strong> ("we") handles in Housedge (the "Service"), why, and what your rights are. The Service is a business tool that measures how AI assistants describe companies and brands. This policy also covers our public website and its contact form.</p>
 
       <h2>1. Who is responsible</h2>
       <p>The data controller is <F v={c.name} label="Company name" />, business ID <F v={c.businessId} label="Business ID (Y-tunnus)" />, <F v={c.address} label="Street address, postcode and city" />, <F v={c.country} label="Country" />. Contact us about privacy at <F v={c.email} label="Contact email" />.</p>
@@ -118,7 +118,7 @@ export function Terms() {
   const c = d?.company || {};
   return (
     <Page title="Terms of use" d={d}>
-      <p>These terms apply to AI Answer Tracker (the "Service"), provided by <strong><F v={c.name} label="Company name" /></strong> (business ID <F v={c.businessId} label="Business ID (Y-tunnus)" />). By signing in you accept them on behalf of yourself and the organisation that gave you access.</p>
+      <p>These terms apply to Housedge (the "Service"), provided by <strong><F v={c.name} label="Company name" /></strong> (business ID <F v={c.businessId} label="Business ID (Y-tunnus)" />). By signing in you accept them on behalf of yourself and the organisation that gave you access.</p>
 
       <h2>1. What the Service does</h2>
       <p>The Service asks AI assistants questions through their official programming interfaces (APIs), records the answers, and turns them into measurements, reports and suggested actions. <strong>It measures and advises only.</strong> It does not try to influence what AI assistants say, and it does not publish reviews, posts or any other content.</p>
@@ -170,7 +170,7 @@ export function LegalNotice() {
   const d = useLegal();
   const c = d?.company || {};
   const rows = [
-    ['Service', 'AI Answer Tracker'], ['Provided by', <F key="n" v={c.name} label="Company name" />],
+    ['Service', 'Housedge'], ['Provided by', <F key="n" v={c.name} label="Company name" />],
     ['Business ID', <F key="b" v={c.businessId} label="Business ID (Y-tunnus)" />], ['VAT number', c.vatId || '—'],
     ['Address', <F key="a" v={c.address} label="Street address, postcode and city" />], ['Country', <F key="c" v={c.country} label="Country" />],
     ['Email', <F key="e" v={c.email} label="Contact email" />], ['Phone', c.phone || '—'], ['Website', c.website || '—'],
@@ -184,7 +184,7 @@ export function LegalNotice() {
         {rows.map(([k, v]) => <div key={k} className="contents"><dt className="text-sm text-muted">{k}</dt><dd className="text-[15px]">{v}</dd></div>)}
       </dl>
       <h2>About this service</h2>
-      <p>AI Answer Tracker measures how AI assistants describe brands, using official APIs only. It does not influence AI answers or publish content. See the <Link to="/terms">Terms of use</Link> and the <Link to="/privacy">Privacy policy</Link>.</p>
+      <p>Housedge measures how AI assistants describe brands, using official APIs only. It does not influence AI answers or publish content. See the <Link to="/terms">Terms of use</Link> and the <Link to="/privacy">Privacy policy</Link>.</p>
     </Page>
   );
 }
