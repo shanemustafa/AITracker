@@ -164,8 +164,8 @@ function Team() {
         <table className="w-full"><tbody>
           {t.data.users.map(u => <tr key={u.id}><td className="td">{u.name}<div className="text-xs text-muted">{u.email}</div></td><td className="td"><Badge tone={u.role === 'admin' ? 'accent' : 'default'}>{u.role}</Badge></td>
             <td className="td text-right">{user.role === 'admin' && u.id !== user.id && <button className="btn-ghost btn-sm" onClick={async () => { if (confirm(`Remove ${u.email}?`)) { await api(`/team/user/${u.id}`, { method: 'DELETE' }); t.reload(); } }}>Remove</button>}</td></tr>)}
-          {t.data.invites.map(i => <tr key={i.token}><td className="td text-muted">{i.email}<div className="text-xs">invited, not joined yet</div></td><td className="td"><Badge>{i.role}</Badge></td>
-            <td className="td text-right">{user.role === 'admin' && <button className="btn-ghost btn-sm" onClick={async () => { await api(`/team/invite/${i.token}`, { method: 'DELETE' }); t.reload(); }}>Cancel</button>}</td></tr>)}
+          {t.data.invites.map(i => <tr key={i.id}><td className="td text-muted">{i.email}<div className="text-xs">invited, not joined yet</div></td><td className="td"><Badge>{i.role}</Badge></td>
+            <td className="td text-right">{user.role === 'admin' && <button className="btn-ghost btn-sm" onClick={async () => { await api(`/team/invite/${i.id}`, { method: 'DELETE' }); t.reload(); }}>Cancel</button>}</td></tr>)}
         </tbody></table>
       </Card>
       <div className="grid gap-4">
@@ -173,16 +173,19 @@ function Team() {
           <div className="flex gap-2"><input className="input" type="email" placeholder="colleague@company.com" value={email} onChange={e => setEmail(e.target.value)} disabled={user.role !== 'admin'} />
             <button className="btn-primary" onClick={invite} disabled={!email || user.role !== 'admin'}>Create link</button></div>
           <ErrorBox error={err} />
-          {link && <div className="mt-3 rounded-lg bg-raised p-3 text-xs"><div className="mb-1 text-muted">Send this link (works once):</div><div className="flex items-center gap-2"><code className="flex-1 break-all">{link}</code>
+          {link && <div className="mt-3 rounded-lg bg-raised p-3 text-xs"><div className="mb-1 text-muted">Send this link now. It works once, for 7 days, and is not shown again:</div><div className="flex items-center gap-2"><code className="flex-1 break-all">{link}</code>
             <button className="btn-ghost btn-sm" onClick={() => { navigator.clipboard.writeText(link); toast('Link copied'); }}><Copy size={13} />Copy</button></div></div>}
         </Card>
         <Card title="Change my password">
           <div className="grid gap-2">
             <input className="input" type="password" placeholder="Current password" value={pw.current} onChange={e => setPw({ ...pw, current: e.target.value })} />
             <input className="input" type="password" placeholder="New password (8+ characters)" value={pw.next} onChange={e => setPw({ ...pw, next: e.target.value })} />
-            <button className="btn-primary" onClick={async () => { try { await api('/team/password', { method: 'POST', body: pw }); setPw({ current: '', next: '' }); toast('Password changed'); } catch (e) { alert(e.message); } }}>Change password</button>
+            <button className="btn-primary" onClick={async () => { try { await api('/team/password', { method: 'POST', body: pw }); setPw({ current: '', next: '' }); toast('Password changed. Other devices were signed out.'); } catch (e) { alert(e.message); } }}>Change password</button>
           </div>
         </Card>
+        {user.role === 'admin' && <Card title="Sign out everyone" subtitle="Use this after a security problem. Everyone (including you on other devices) must sign in again. You stay signed in here.">
+          <button className="btn-danger" onClick={async () => { if (confirm('Sign out every person on every device?')) { try { const r = await api('/team/sign-out-everyone', { method: 'POST' }); toast(`Done: ${r.ended} sign-in(s) ended`); } catch (e) { alert(e.message); } } }}>Sign out everyone</button>
+        </Card>}
       </div>
     </div>
   );
@@ -194,7 +197,8 @@ function ApiTab({ s, reload }) {
   const base = window.location.origin;
   const pid = projects.data?.[0]?.id || 1;
   const copy = t => { navigator.clipboard.writeText(t); toast('Copied'); };
-  const sheet = `=IMPORTDATA("${base}/api/v1/projects/${pid}/daily.csv?days=90&key=${s.apiToken}")`;
+  const sheet = `=IMPORTDATA("${base}/api/v1/projects/${pid}/daily.csv?days=90&key=${s.apiToken || 'YOUR_KEY'}")`;
+  if (!s.apiToken) return <Card title="API & exports" subtitle="Only an admin can see or change the API key. Ask an admin if you need a live data connection. CSV downloads work for everyone from each project's Export menu." />;
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       <Card title="Your API key" subtitle="Lets other tools read your data. Treat it like a password.">

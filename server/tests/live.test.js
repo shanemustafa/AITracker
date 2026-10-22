@@ -34,7 +34,7 @@ before(async () => {
       });
       if (req.url.includes(':generateContent')) return send({
         candidates: [{ content: { role: 'model', parts: [{ text: ANSWER }] }, finishReason: 'STOP',
-          groundingMetadata: { webSearchQueries: ['best casino finland'], groundingChunks: [{ web: { uri: `http://localhost:${port}/redirect/abc?grounding-api-redirect`, title: 'askgamblers.com' } }] } }],
+          groundingMetadata: { webSearchQueries: ['best casino finland'], groundingChunks: [{ web: { uri: 'https://vertexaisearch.cloud.google.com/grounding-api-redirect/abc', title: 'askgamblers.com' } }] } }],
         usageMetadata: { promptTokenCount: 200, candidatesTokenCount: 400 }, modelVersion: 'gemini-flash-latest',
       });
       if (req.url.startsWith('/anthropic/v1/messages')) return send({
@@ -56,6 +56,11 @@ before(async () => {
   process.env.GEMINI_BASE_URL = `http://localhost:${port}`;
   process.env.PERPLEXITY_BASE_URL = `http://localhost:${port}/pplx`;
   process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'ait-test-'));
+  // Google's redirect host is answered locally (no real network call in tests).
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (url, opts) => String(url).startsWith('https://vertexaisearch.cloud.google.com/')
+    ? Promise.resolve(new Response(null, { status: 302, headers: { Location: 'https://www.askgamblers.com/finland' } }))
+    : realFetch(url, opts);
 });
 after(() => server.close());
 

@@ -5,21 +5,29 @@ import { ENGINES, estimateAnswerCost, actualCost } from './engines/index.js';
 import { LIVE_ADAPTERS } from './engines/live.js';
 import { simulateAnswer } from './engines/simulated.js';
 import { brandsOf, isoDay } from './metrics.js';
+import { safeHttpUrl } from './security.js';
+import { redact } from './config.js';
+
+const MAX_ANSWER_CHARS = 60_000;
+const MAX_CITATIONS = 50;
 
 export function storeAnalysis(answerId, projectId, text, citations, brands) {
   const { mentions, others } = analyzeAnswer(text, brands);
   for (const m of mentions) run('INSERT INTO mentions(answer_id, project_id, brand_id, position, sentiment, snippet) VALUES (?,?,?,?,?,?)',
     answerId, projectId, m.brand_id, m.position, m.sentiment, m.snippet);
   for (const o of others) run('INSERT INTO other_brands(answer_id, project_id, name) VALUES (?,?,?)', answerId, projectId, o);
-  for (const c of citations || []) {
-    const domain = domainOf(c.url);
+  // AI answers are untrusted text: only plain web links are kept (no javascript:, data:, file: links).
+  for (const c of (citations || []).slice(0, MAX_CITATIONS)) {
+    const url = safeHttpUrl(c?.url);
+    const domain = url && domainOf(url);
     if (!domain) continue;
     run('INSERT INTO citations(answer_id, project_id, url, domain, title, category) VALUES (?,?,?,?,?,?)',
-      answerId, projectId, c.url, domain, (c.title || '').slice(0, 300), classifySource(domain, brands));
+      answerId, projectId, url, domain, String(c.title || '').replace(/[\u0000-\u001F\u007F]/g, ' ').slice(0, 300), classifySource(domain, brands));
   }
 }
 
 export function storeAnswer({ runId, project, prompt, engine, day, result, simulated, cost, brands }) {
+  result = { ...result, text: String(result.text || '').slice(0, MAX_ANSWER_CHARS), model: String(result.model || '').slice(0, 100) };
   const info = run(`INSERT INTO answers(run_id, project_id, prompt_id, engine, day, text, model, simulated, cost)
     VALUES (?,?,?,?,?,?,?,?,?)`, runId, project.id, prompt.id, engine, day, result.text, result.model, simulated ? 1 : 0, cost || 0);
   storeAnalysis(Number(info.lastInsertRowid), project.id, result.text, result.citations, brands);
@@ -42,6 +50,8 @@ export function reanalyzeProject(projectId) {
       run('UPDATE citations SET category = ? WHERE id = ?', classifySource(c.domain, brands), c.id);
   });
 }
+
+let reserved = 0; // estimated cost of AI requests currently in flight, across all runs
 
 export function monthSpend() {
   const month = new Date().toISOString().slice(0, 7);
@@ -96,7 +106,7 @@ export function startRun(projectId, trigger = 'manual') {
     projectId, trigger, simulated ? 1 : 0, prompts.length * engines.length).lastInsertRowid);
   running.set(projectId, runId);
   execute(runId, project, prompts, engines, simulated)
-    .catch(e => run("UPDATE runs SET status = 'failed', message = ?, finished_at = datetime('now') WHERE id = ?", String(e.message || e), runId))
+    .catch(e => run("UPDATE runs SET status = 'failed', message = ?, finished_at = datetime('now') WHERE id = ?", redact(String(e?.message || e)).slice(0, 500), runId))
     .finally(() => running.delete(projectId));
   return { runId };
 }
@@ -126,16 +136,19 @@ async function execute(runId, project, prompts, engines, simulated) {
     const usable = engines.filter(e => keys[e]);
     for (const e of engines) if (!keys[e]) messages.push(`${ENGINES[e].label} skipped: no API key connected.`);
     const jobs = prompts.flatMap(prompt => usable.map(engine => ({ prompt, engine })));
+    const secrets = Object.values(keys);
     let stopped = false;
     const worker = async () => {
       while (jobs.length && !stopped) {
         const { prompt, engine } = jobs.shift();
         const est = estimateAnswerCost(engine, prices);
-        if (!cap || monthSpend() + est > cap) {
+        // Money already promised to answers still in progress counts too, so parallel requests cannot overshoot the cap.
+        if (!cap || monthSpend() + reserved + est > cap) {
           stopped = true;
           messages.push(cap ? `Stopped: the monthly spending cap ($${cap}) would be exceeded.` : 'Stopped: no monthly spending cap is set. Set one in Settings → Costs first.');
           break;
         }
+        reserved += est;
         try {
           const model = getSetting(ENGINES[engine].modelSetting) || ENGINES[engine].defaultModel;
           const result = await LIVE_ADAPTERS[engine]({ question: prompt.text, country: prompt.country, apiKey: keys[engine], model });
@@ -144,10 +157,10 @@ async function execute(runId, project, prompts, engines, simulated) {
           cost += c; done++;
         } catch (e) {
           failed++;
-          const msg = String(e?.message || e).slice(0, 500);
+          const msg = redact(String(e?.message || e), secrets).slice(0, 500);
           run('INSERT INTO answers(run_id, project_id, prompt_id, engine, day, simulated, error) VALUES (?,?,?,?,?,0,?)', runId, project.id, prompt.id, engine, day, msg);
           if (!messages.some(m => m.startsWith(ENGINES[engine].label))) messages.push(`${ENGINES[engine].label}: ${msg}`);
-        }
+        } finally { reserved -= est; }
         bump();
       }
     };
@@ -175,7 +188,7 @@ export function startScheduler() {
       const every = INTERVAL_DAYS[p.frequency] || 1;
       const last = p.last_run_at ? new Date(p.last_run_at + 'Z') : new Date(0);
       const due = isoDay(last.getTime() + every * 86400000) <= isoDay(Date.now());
-      if (due) { try { startRun(p.id, 'scheduled'); } catch (e) { console.error('Scheduled run failed', e); } }
+      if (due) { try { startRun(p.id, 'scheduled'); } catch (e) { console.error('Scheduled run failed', redact(e?.stack || e)); } }
     }
   };
   setInterval(tick, 10 * 60 * 1000);

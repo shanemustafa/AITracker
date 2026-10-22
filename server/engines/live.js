@@ -38,11 +38,19 @@ async function askOpenAI({ question, country, apiKey, model }) {
 }
 
 // ---------- Gemini (Gemini API + Grounding with Google Search) ----------
+// Google returns short redirect links; we follow one hop to learn the real website address.
+// Only Google's own redirect host is ever contacted (never an address taken from answer text),
+// so a crafted link cannot make the server call internal or third-party addresses.
+const REDIRECT_HOST = 'vertexaisearch.cloud.google.com';
+export function isGoogleRedirect(uri) {
+  try { const u = new URL(uri); return u.protocol === 'https:' && u.hostname === REDIRECT_HOST && !u.port && !u.username; } catch { return false; }
+}
 async function resolveRedirect(uri) {
-  // Google returns short redirect links; we follow one hop to learn the real website address.
+  if (!isGoogleRedirect(uri)) return uri;
   try {
     const res = await fetch(uri, { method: 'HEAD', redirect: 'manual', signal: AbortSignal.timeout(8000) });
-    return res.headers.get('location') || uri;
+    const loc = res.headers.get('location');
+    try { return loc && ['http:', 'https:'].includes(new URL(loc).protocol) ? loc : uri; } catch { return uri; }
   } catch { return uri; }
 }
 async function askGemini({ question, apiKey, model }) {
@@ -54,9 +62,10 @@ async function askGemini({ question, apiKey, model }) {
   const chunks = (gm.groundingChunks || []).map(c => c.web).filter(Boolean);
   const citations = await Promise.all(chunks.map(async w => {
     let url = w.uri;
-    if (url && /grounding-api-redirect|vertexaisearch/.test(url)) {
+    if (url && isGoogleRedirect(url)) {
       const real = await resolveRedirect(url);
-      url = real !== url ? real : (w.title && w.title.includes('.') ? `https://${w.title}/` : url);
+      const fromTitle = /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(w.title || '') ? `https://${w.title}/` : url;
+      url = real !== url ? real : fromTitle;
     }
     return { url, title: w.title };
   }));
@@ -75,7 +84,7 @@ async function askPerplexity({ question, apiKey, model }) {
     signal: AbortSignal.timeout(TIMEOUT_MS),
   });
   const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(`Perplexity said ${res.status}: ${body?.error?.message || JSON.stringify(body).slice(0, 300)}`);
+  if (!res.ok) throw Object.assign(new Error(`Perplexity said ${res.status}: ${String(body?.error?.message || 'request failed').slice(0, 300)}`), { status: res.status >= 500 ? 502 : 400, expose: true });
   if (body.status && !['completed', 'incomplete'].includes(body.status)) throw new Error(`Perplexity run ${body.status}`);
   let text = body.output_text || '';
   const citations = [];

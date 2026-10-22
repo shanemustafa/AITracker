@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
-import { useApi, useFilters } from '../lib.js';
+import { useApi, useFilters, safeHref } from '../lib.js';
 import { useProject } from '../ctx.js';
 import { Card, PageHeader, Spinner, ErrorBox, Badge, SimBanner, Segmented, Bar } from '../ui.jsx';
 import { HBars } from '../charts.jsx';
@@ -56,7 +56,7 @@ export default function Sources() {
                 <ul>
                   {d.urls.filter(x => !type || x.category === type).map(u => (
                     <li key={u.url} className="flex items-center justify-between gap-3 border-t border-line px-3 py-2 text-sm">
-                      <div className="min-w-0"><a href={u.url} target="_blank" rel="noreferrer" className="block truncate hover:underline">{u.title || u.url}</a><div className="truncate text-xs text-muted">{u.url}</div></div>
+                      <div className="min-w-0"><a href={safeHref(u.url)} target="_blank" rel="noopener noreferrer" className="block truncate hover:underline">{u.title || u.url}</a><div className="truncate text-xs text-muted">{u.url}</div></div>
                       <span className="tnum shrink-0 text-xs text-ink2">{u.n}×</span>
                     </li>
                   ))}

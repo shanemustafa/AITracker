@@ -24,14 +24,18 @@ export function answerFilter(projectId, f = {}) {
   return { sql: `SELECT a.id FROM answers a JOIN prompts p ON p.id = a.prompt_id WHERE ${where.join(' AND ')}`, params };
 }
 
-export function parseFilter(q) {
-  const days = Number(q.days) || 30;
-  const to = q.to || isoDay(Date.now());
-  const from = q.from || isoDay(new Date(to + 'T00:00:00Z').getTime() - (days - 1) * DAY);
+// Query-string filters come straight from the browser: only well-formed values get through.
+const one = v => (Array.isArray(v) ? v[0] : v);
+const text = (v, max = 80) => (typeof one(v) === 'string' ? one(v).slice(0, max) : '');
+const dayOk = v => (/^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(Date.parse(v + 'T00:00:00Z')) ? v : '');
+export function parseFilter(q = {}) {
+  const days = Math.min(400, Math.max(1, Math.floor(Number(one(q.days))) || 30));
+  const to = dayOk(text(q.to, 10)) || isoDay(Date.now());
+  const from = dayOk(text(q.from, 10)) || isoDay(new Date(to + 'T00:00:00Z').getTime() - (days - 1) * DAY);
   return {
     from, to, days,
-    engines: q.engines ? String(q.engines).split(',').filter(Boolean) : [],
-    country: q.country || '', tag: q.tag || '', topic: q.topic || '',
+    engines: text(q.engines, 200).split(',').filter(e => /^[a-z]{2,20}$/.test(e)).slice(0, 10),
+    country: text(q.country, 10), tag: text(q.tag), topic: text(q.topic),
   };
 }
 export function previousPeriod(f) {

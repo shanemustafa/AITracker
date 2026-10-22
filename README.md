@@ -58,10 +58,12 @@ Data lives in `data/app.db` (or the folder in `DATA_DIR`). Backups go to `data/b
 
 | Variable | Purpose |
 |---|---|
-| `SETUP_CODE` | Required to create the first (admin) account, and to reset a forgotten password. Set this when the app is online. |
+| `SETUP_CODE` | **Required in production** (16+ characters). Creates the first (admin) account and resets forgotten passwords. |
 | `SEED_DEMO` | Set to `1` to load the three simulated demo clients on a new installation. Leave unset for a real installation. |
 | `DATA_DIR` | Where the database and backups are stored (use a persistent disk). |
 | `PORT` | Web port (default 3000). |
 | `KEY_OPENAI`, `KEY_GEMINI`, `KEY_PERPLEXITY`, `KEY_ANTHROPIC` | API keys, if you prefer not to paste them in Settings. |
+
+Security and key rotation: [docs/SECURITY.md](docs/SECURITY.md). Every variable name is listed in `.env.example`.
 
 See [docs/GOING_LIVE.md](docs/GOING_LIVE.md) for the step-by-step guide to connecting the real AI services and publishing online.

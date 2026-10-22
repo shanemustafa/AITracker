@@ -104,6 +104,8 @@ CREATE INDEX IF NOT EXISTS idx_other_proj ON other_brands(project_id, name);
 // Small upgrades for databases created by older versions (adds columns that are missing).
 const cols = db.prepare("SELECT name FROM pragma_table_info('projects')").all().map(r => r.name);
 if (!cols.includes('fee')) db.exec('ALTER TABLE projects ADD COLUMN fee REAL');
+const sessCols = db.prepare("SELECT name FROM pragma_table_info('sessions')").all().map(r => r.name);
+if (!sessCols.includes('created_at')) db.exec('ALTER TABLE sessions ADD COLUMN created_at TEXT');
 if (!cols.includes('currency')) db.exec("ALTER TABLE projects ADD COLUMN currency TEXT NOT NULL DEFAULT 'EUR'");
 
 export const all = (sql, ...p) => db.prepare(sql).all(...p);

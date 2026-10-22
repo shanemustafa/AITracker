@@ -1,4 +1,5 @@
 // One-time changes to an existing installation. Each runs once and records that it ran.
+import crypto from 'node:crypto';
 import { all, get, run, getSetting, setSetting, backup, tx } from './db.js';
 import { PROMPT_LIBRARY } from './seed/library.js';
 import { addBrand, addPrompt } from './seed/demo.js';
@@ -44,7 +45,20 @@ function addFinnplay() {
   setSetting('migr_add_finnplay_v1', new Date().toISOString());
 }
 
+// Security upgrade: sign-in and invite tokens are now stored only as hashes.
+// Old sign-ins are ended (everyone signs in again once); pending invite links keep working.
+function hashTokens() {
+  if (getSetting('migr_hash_tokens_v1')) return;
+  const sha = t => crypto.createHash('sha256').update(String(t)).digest('hex');
+  tx(() => {
+    run('DELETE FROM sessions');
+    for (const i of all('SELECT token FROM invites WHERE accepted_at IS NULL')) run('UPDATE invites SET token = ? WHERE token = ?', sha(i.token), i.token);
+  });
+  setSetting('migr_hash_tokens_v1', new Date().toISOString());
+}
+
 export function runMigrations() {
+  hashTokens();
   removeDemoData();
   addFinnplay();
 }

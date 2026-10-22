@@ -1,7 +1,7 @@
 import { Fragment, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ExternalLink, Search, ChevronDown, ChevronUp } from 'lucide-react';
-import { useApi, useFilters, useColors, fmtDate, COUNTRY_FLAGS } from '../lib.js';
+import { useApi, useFilters, useColors, fmtDate, COUNTRY_FLAGS, safeHref } from '../lib.js';
 import { useMeta, useProject } from '../ctx.js';
 import { PageHeader, Spinner, ErrorBox, Badge, SimBadge, BrandDot, Empty, Sentiment } from '../ui.jsx';
 import FilterBar from './FilterBar.jsx';
@@ -36,7 +36,7 @@ function useHighlighter(brands) {
       while ((m = md.exec(text))) {
         if (m.index > last) pushText(text.slice(last, m.index));
         if (m[1]) pushText(m[1], true);
-        else parts.push(<a key={key + '-a' + i++} href={m[3]} target="_blank" rel="noreferrer" className="text-accent underline">{m[2]}</a>);
+        else parts.push(<a key={key + '-a' + i++} href={safeHref(m[3])} target="_blank" rel="noopener noreferrer" className="text-accent underline">{m[2]}</a>);
         last = m.index + m[0].length;
       }
       if (last < text.length) pushText(text.slice(last));
@@ -121,7 +121,7 @@ function ChatCard({ r, hl, meta }) {
         <div className="mt-3 border-t border-line pt-3">
           <div className="mb-1 text-xs font-medium text-muted">Sources cited ({r.citations.length})</div>
           <ul className="grid gap-1 text-xs">
-            {r.citations.map(c => <li key={c.url} className="flex items-center gap-2"><Badge>{meta.sourceTypes[c.category]}</Badge><a className="truncate hover:underline" href={c.url} target="_blank" rel="noreferrer">{c.title || c.url}</a><ExternalLink size={11} className="text-muted shrink-0" /></li>)}
+            {r.citations.map(c => <li key={c.url} className="flex items-center gap-2"><Badge>{meta.sourceTypes[c.category]}</Badge><a className="truncate hover:underline" href={safeHref(c.url)} target="_blank" rel="noopener noreferrer">{c.title || c.url}</a><ExternalLink size={11} className="text-muted shrink-0" /></li>)}
           </ul>
         </div>
       )}

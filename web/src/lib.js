@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+// Links that came from AI answers: only open plain web addresses.
+export const safeHref = u => { try { const x = new URL(u); return x.protocol === 'https:' || x.protocol === 'http:' ? x.href : undefined; } catch { return undefined; } };
+
 // Read-only preview: answers come from a recording embedded in the page (window.__PREVIEW__).
 export const PREVIEW = typeof window !== 'undefined' && !!window.__PREVIEW__;
 function previewAnswer(path, method) {
