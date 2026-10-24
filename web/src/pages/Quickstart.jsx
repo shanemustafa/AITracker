@@ -13,20 +13,34 @@ export default function Quickstart() {
   const [step, setStep] = useState(0);
   const [err, setErr] = useState(null);
   const [s, setS] = useState({
-    category: 'operator', name: '', contact: '', goals: '', markets: ['FI'], compNotes: '', questionNotes: '',
+    category: 'business', offer: '', name: '', contact: '', goals: '', markets: ['FI'], compNotes: '', questionNotes: '',
     own: { name: '', domain: '' }, competitors: [], prompts: [], custom: '', customCountry: 'FI', customLang: 'en',
     engines: meta.engines.filter(e => e.supported).map(e => e.id), frequency: 'daily',
   });
   const up = patch => setS(x => ({ ...x, ...patch }));
 
   const lib = meta.brandLibrary.filter(b => b.category === s.category);
-  const libPrompts = useMemo(() => meta.promptLibrary.map((p, i) => ({ ...p, key: i }))
-    .filter(p => p.c === s.category && (s.markets.includes(p.country) || p.country === 'GLOBAL')), [s.category, s.markets.join()]);
+  const offer = s.offer.trim(), brandName = s.own.name.trim();
+  const libPrompts = useMemo(() => {
+    if (s.category !== 'business') return meta.promptLibrary.map((p, i) => ({ ...p, key: i }))
+      .filter(p => p.c === s.category && (s.markets.includes(p.country) || p.country === 'GLOBAL'));
+    // Any other business: fill the general templates with what the client offers, per market.
+    const out = [];
+    meta.generalPrompts.forEach((g, i) => {
+      if (g.brand) { if (brandName) out.push({ key: `g${i}`, country: 'GLOBAL', language: 'en', topic: g.topic, text: g.t.replace('{brand}', brandName) }); return; }
+      if (!offer) return;
+      if (!g.t.includes('{where}')) { out.push({ key: `g${i}`, country: 'GLOBAL', language: 'en', topic: g.topic, text: g.t.replace('{offer}', offer) }); return; }
+      for (const m of s.markets) out.push({ key: `g${i}-${m}`, country: m, language: 'en', topic: g.topic,
+        text: g.t.replace('{offer}', offer).replace('{where}', m === 'GLOBAL' ? '' : ` in ${meta.countries[m]}`) });
+    });
+    return out;
+  }, [s.category, s.markets.join(), offer, brandName]);
   useEffect(() => { up({ prompts: libPrompts.map(p => p.key) }); }, [libPrompts]);
 
   const next = () => {
     setErr(null);
     if (step === 0 && !s.markets.length) return setErr('Pick at least one market.');
+    if (step === 0 && s.category === 'business' && !s.offer.trim()) return setErr('Describe in a few words what the client offers.');
     if (step === 1 && !s.own.name.trim()) return setErr('Type the client\'s brand name.');
     if (step === 2 && !s.competitors.length) return setErr('Add at least one competitor.');
     if (step === 2 && !s.custom) up({ custom: s.questionNotes });
@@ -62,7 +76,9 @@ export default function Quickstart() {
                 ))}
               </div>
             </div>
-            <Field label="Project name (optional)" value={s.name} onChange={v => up({ name: v })} placeholder="e.g. Acme Casino — Finland launch" />
+            {s.category === 'business' && <div className="sm:col-span-2"><Field label="What does the client offer, in their customers' words?" value={s.offer} onChange={v => up({ offer: v })} placeholder="e.g. employee benefits apps, accounting software, vegan restaurants" />
+              <p className="mt-1 text-xs text-muted">Used to write the starter questions, e.g. "What are the best employee benefits apps in Finland?"</p></div>}
+            <Field label="Project name (optional)" value={s.name} onChange={v => up({ name: v })} placeholder="e.g. Acme — Nordic launch" />
             <Field label="Client contact (optional)" value={s.contact} onChange={v => up({ contact: v })} placeholder="Name, role" />
             <div className="sm:col-span-2">
               <span className="label">Priority markets</span>
@@ -75,7 +91,7 @@ export default function Quickstart() {
             </div>
             <Area label="Who does the client see as real competitors?" value={s.compNotes} onChange={v => up({ compNotes: v })} placeholder="Names the client mentioned, including local ones" />
             <Area label="Example questions their customers ask" value={s.questionNotes} onChange={v => up({ questionNotes: v })} placeholder="One per line — these will be added as questions" />
-            <div className="sm:col-span-2"><Area label="What does the client want to achieve?" value={s.goals} onChange={v => up({ goals: v })} placeholder="e.g. Be recommended for Finland before the market opens in July 2027" /></div>
+            <div className="sm:col-span-2"><Area label="What does the client want to achieve?" value={s.goals} onChange={v => up({ goals: v })} placeholder="e.g. Be recommended when customers ask AI for the best options in our market" /></div>
           </div>
         </>}
 
@@ -85,8 +101,8 @@ export default function Quickstart() {
             {lib.map(b => <button key={b.name} className={`chip ${s.own.name === b.name ? 'chip-on' : ''}`} onClick={() => up({ own: { name: b.name, domain: b.domain, aliases: b.aliases } })}>{b.name}</button>)}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Brand name" value={s.own.name} onChange={v => up({ own: { ...s.own, name: v } })} placeholder="e.g. LeoVegas" />
-            <Field label="Website" value={s.own.domain} onChange={v => up({ own: { ...s.own, domain: v } })} placeholder="e.g. leovegas.com" />
+            <Field label="Brand name" value={s.own.name} onChange={v => up({ own: { ...s.own, name: v } })} placeholder={s.category === 'business' ? 'e.g. Acme' : 'e.g. LeoVegas'} />
+            <Field label="Website" value={s.own.domain} onChange={v => up({ own: { ...s.own, domain: v } })} placeholder={s.category === 'business' ? 'e.g. acme.com' : 'e.g. leovegas.com'} />
           </div>
           {lib.find(b => b.name === s.own.name)?.note && <p className="mt-3 text-xs text-muted">Note: {lib.find(b => b.name === s.own.name).note}</p>}
         </>}
@@ -228,7 +244,7 @@ function FirstRun({ s, libPrompts, onDone }) {
         const { id } = await api('/projects', { method: 'POST', body: {
           name: s.name || s.own.name, category: s.category, own: s.own, competitors: s.competitors, prompts,
           engines: s.engines, countries: s.markets, frequency: s.frequency,
-          discovery: { competitors: s.compNotes || s.competitors.map(c => c.name).join(', '), markets: s.markets, questions: s.questionNotes || prompts.slice(0, 5).map(p => p.text).join('\n'), goals: s.goals, contact: s.contact },
+          discovery: { competitors: s.compNotes || s.competitors.map(c => c.name).join(', '), markets: s.markets, questions: s.questionNotes || prompts.slice(0, 5).map(p => p.text).join('\n'), goals: s.goals, contact: s.contact, ...(s.offer ? { offer: s.offer } : {}) },
         } });
         setPid(id);
         setPhase('running');

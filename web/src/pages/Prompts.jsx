@@ -120,7 +120,7 @@ function AddModal({ open, onClose, onDone }) {
   return (
     <Modal open={open} onClose={onClose} title="Add questions" wide>
       <label className="label">Questions — one per line</label>
-      <textarea className="input" rows={8} value={v.text} onChange={e => setV({ ...v, text: e.target.value })} placeholder={'Which online casino in Finland pays out fastest?\nWhat is the safest betting site for Finnish players?'} />
+      <textarea className="input" rows={8} value={v.text} onChange={e => setV({ ...v, text: e.target.value })} placeholder={'What is the best accounting software for small businesses in Finland?\nWhich online casino in Finland pays out fastest?'} />
       <div className="mt-3 grid gap-3 sm:grid-cols-4">
         <div><label className="label">Topic</label><input className="input" value={v.topic} onChange={e => setV({ ...v, topic: e.target.value })} placeholder="e.g. Payments" /></div>
         <div><label className="label">Tags (comma separated)</label><input className="input" value={v.tags} onChange={e => setV({ ...v, tags: e.target.value })} placeholder="e.g. B2C, launch" /></div>

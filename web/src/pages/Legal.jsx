@@ -136,7 +136,7 @@ export function Terms() {
 
       <h2>4. Acceptable use</h2>
       <ul>
-        <li>Use the Service lawfully, including data-protection law and the gambling-advertising rules of each market you work in (for example Finland, Sweden, the UK and Germany).</li>
+        <li>Use the Service lawfully, including data-protection, consumer-protection and advertising law, and any industry-specific marketing rules (for example gambling-advertising rules) in each market you work in.</li>
         <li>Act honestly on the results: no fake reviews, no posing as customers, no hidden paid placements, and no marketing to minors or vulnerable people.</li>
         <li>Do not put personal data into tracked questions, try to break or overload the Service, or access accounts that are not yours.</li>
         <li>Follow the terms of the AI providers whose engines you connect.</li>

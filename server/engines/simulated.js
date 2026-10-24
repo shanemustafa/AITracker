@@ -26,6 +26,7 @@ const LOCAL_BRANDS = {
 };
 const EXTRA_BY_CATEGORY = {
   operator: ['Casumo', 'Mr Green', 'Videoslots', 'Rizk'],
+  business: [],
   platform: ['Kambi', 'Gaming Innovation Group', 'BetConstruct', 'Slotegrator'],
   studio: ['NetEnt', 'Push Gaming', 'Yggdrasil', 'ELK Studios', 'Thunderkick'],
 };
@@ -36,6 +37,7 @@ const SOURCES = {
   UK: ['oddschecker.com', 'trustpilot.com', 'gamblingcommission.gov.uk', 'bbc.co.uk', 'reddit.com', 'askgamblers.com'],
   DE: ['casino.org', 'gluecksspiel-behoerde.de', 'reddit.com', 'casino.guru'],
   GLOBAL: ['askgamblers.com', 'casino.guru', 'trustpilot.com', 'wikipedia.org', 'igamingbusiness.com', 'reddit.com'],
+  business: ['trustpilot.com', 'reddit.com', 'g2.com', 'forbes.com', 'wikipedia.org', 'linkedin.com', 'capterra.com'],
   platform: ['sigma.world', 'igamingbusiness.com', 'egr.global', 'gamingintelligence.com', 'g2.com', 'linkedin.com', 'next.io', 'sbcnews.co.uk'],
   studio: ['slotcatalog.com', 'bigwinboard.com', 'casino.guru', 'igamingbusiness.com', 'reddit.com', 'wikipedia.org', 'sbcnews.co.uk'],
 };
@@ -49,6 +51,14 @@ const PHRASES = {
       'operates multiple brands across Europe', 'covers most major sports and markets'],
     neg: ['has some complaints about slow verification and withdrawal delays', 'has faced regulatory fines in the past',
       'has bonus terms that are criticised as confusing', 'has mixed reviews for customer support'],
+  },
+  business: {
+    pos: ['is often recommended for its reliable service', 'gets strong customer reviews', 'is praised for being easy to use',
+      'is seen as good value for money', 'is known for helpful customer support'],
+    neu: ['offers a standard set of features', 'serves customers in several countries', 'has a range of plans for different needs',
+      'is one of several established options'],
+    neg: ['has some complaints about customer support response times', 'is considered more expensive than some alternatives',
+      'has mixed reviews on independent review sites'],
   },
   platform: {
     pos: ['is a leading platform with strong compliance tooling', 'offers a flexible, modular platform and fast time to market',
@@ -89,12 +99,12 @@ export function simulateAnswer({ prompt, engine, day, brands, category, projectI
 
   // Candidate brands: tracked ones + a few untracked ones the "AI" also likes to mention.
   const lib = new Map(BRAND_LIBRARY.map(b => [b.name, b]));
-  const extras = [...(category === 'operator' ? LOCAL_BRANDS[country] || [] : []), ...EXTRA_BY_CATEGORY[category]]
+  const extras = [...(category === 'operator' ? LOCAL_BRANDS[country] || [] : []), ...(EXTRA_BY_CATEGORY[category] || [])]
     .filter(n => !brands.some(b => b.name === n)).map(n => ({ name: n, domain: lib.get(n)?.domain, untracked: true }));
   const pool = [...brands, ...extras];
 
   // Citations: a mix of review sites, news, forums, regulators and brand websites.
-  const srcPool = category === 'operator' ? SOURCES[country] : SOURCES[category];
+  const srcPool = (category === 'operator' ? SOURCES[country] : SOURCES[category]) || SOURCES.business;
   const n = { perplexity: 5, gemini: 4, chatgpt: 3, claude: 3 }[engine] + Math.floor(r() * 3);
   const citations = [];
   const shuffled = [...srcPool].sort(() => r() - 0.5);
@@ -120,7 +130,7 @@ export function simulateAnswer({ prompt, engine, day, brands, category, projectI
   const ranked = pool.filter(b => !forced.includes(b)).map(b => ({ b, w: weightOf(b) })).sort((a, b) => b.w - a.w);
   const chosen = [...forced, ...ranked.slice(0, Math.max(0, count - forced.length)).filter(x => x.w > 0.3).map(x => x.b)];
 
-  const phrases = PHRASES[category];
+  const phrases = PHRASES[category] || PHRASES.business;
   const lines = chosen.map((b, i) => {
     const mood = h01(b.name + 'tone') + (r() - 0.5) * 0.6;
     const set = mood > 0.62 ? phrases.pos : mood < 0.2 ? phrases.neg : phrases.neu;
@@ -129,7 +139,7 @@ export function simulateAnswer({ prompt, engine, day, brands, category, projectI
   const where = category === 'operator' ? WHERE[country] : WHERE[country] || '';
   const text = [
     pick(r, INTROS).replace('{where}', where), '', ...lines, '',
-    category === 'operator' ? CLOSINGS[country] : 'Shortlist two or three and ask each for references from operators in your target markets.',
+    category === 'operator' ? CLOSINGS[country] : category === 'business' ? 'Compare two or three options and read recent independent reviews before deciding.' : 'Shortlist two or three and ask each for references from operators in your target markets.',
   ].join('\n');
 
   for (const b of chosen) {

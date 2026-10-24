@@ -45,7 +45,7 @@ export default function Home({ signedIn }) {
       <Shift />
       <Features />
       <HowItWorks />
-      <ForIgaming />
+      <Industries />
       <Faq />
       <Contact />
       <Footer signedIn={signedIn} />
@@ -55,7 +55,7 @@ export default function Home({ signedIn }) {
 
 function Header({ signedIn }) {
   const [open, setOpen] = useState(false);
-  const links = [['#features', 'Features'], ['#how', 'How it works'], ['#igaming', 'For iGaming'], ['#faq', 'FAQ']];
+  const links = [['#features', 'Features'], ['#how', 'How it works'], ['#industries', 'Industries'], ['#faq', 'FAQ']];
   return (
     <header className="glass sticky top-0 z-40 border-b border-line">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
@@ -91,14 +91,14 @@ function Hero() {
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, ease: EASE }}>
           <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3.5 py-1.5 text-xs font-medium text-ink2 shadow-thumb">
             <span className="flex -space-x-1">{ENGINES.map(e => <span key={e.name} className="h-2.5 w-2.5 rounded-full ring-2 ring-[var(--surface)]" style={{ background: e.color }} />)}</span>
-            For casino &amp; sportsbook operators, platforms and game studios
+            For brands of every size, with a specialty in iGaming
           </span>
           <h1 className="mx-auto mt-6 max-w-4xl text-[40px] font-semibold leading-[1.05] tracking-title sm:text-[64px] lg:text-[76px]">
-            See what AI tells players about{' '}
+            See what AI tells your customers about{' '}
             <span className="bg-clip-text text-transparent" style={{ backgroundImage: 'linear-gradient(100deg, #0a84ff, #bf5af2 55%, #ff9f0a)' }}>your brand.</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-[17px] leading-relaxed text-ink2 sm:text-[19px]">
-            Players now ask ChatGPT, Gemini, Perplexity and Claude where to play. We track those answers in every market you care about,
+            People now ask ChatGPT, Gemini, Perplexity and Claude what to buy and who to trust. We track those answers in every market you care about,
             show how you compare with competitors, and tell you what to improve, with the evidence.
           </p>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
@@ -130,10 +130,10 @@ function ProductPicture() {
             <div className="mb-4 flex items-center gap-2 text-xs text-muted"><span className="h-2 w-2 rounded-full" style={{ background: '#0a84ff' }} />ChatGPT answer</div>
             <motion.div className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-accent px-4 py-2.5 text-[14px] text-white"
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
-              Which online casinos are best in Finland?
+              What is the best accounting software for a small business in Finland?
             </motion.div>
             <div className="mt-4 rounded-2xl rounded-bl-md bg-raised p-4 text-[14px] leading-relaxed">
-              {[['Competitor A', '#bf5af2', 'large game library, fast payouts.'], ['Your brand', '#0a84ff', 'strong mobile app and local support.'], ['Competitor B', '#30d158', 'good welcome offer.']].map(([b, c, t], i) => (
+              {[['Competitor A', '#bf5af2', 'many integrations, popular with accountants.'], ['Your brand', '#0a84ff', 'easy to use, strong local support.'], ['Competitor B', '#30d158', 'low starting price.']].map(([b, c, t], i) => (
                 <motion.p key={b} className="mb-2" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 + i * 0.35 }}>
                   {i + 1}. <mark className="brand" style={{ borderColor: c }}>{b}</mark> — {t}
                 </motion.p>
@@ -180,7 +180,7 @@ function Engines() {
   return (
     <Section className="pb-24">
       <Reveal className="flex flex-col items-center gap-5">
-        <div className="text-[13px] text-muted">Tracks answers from the AI assistants players use</div>
+        <div className="text-[13px] text-muted">Tracks answers from the AI assistants your customers use</div>
         <div className="flex flex-wrap justify-center gap-x-10 gap-y-4">
           {ENGINES.map(e => (
             <span key={e.name} className="flex items-center gap-2.5 text-[20px] font-semibold tracking-title text-ink2">
@@ -195,13 +195,13 @@ function Engines() {
 
 function Shift() {
   const steps = [
-    ['A player asks', '"What is the most trusted casino in Finland?" or "Which sportsbook has the best odds for the Premier League?"'],
+    ['A customer asks', '"What is the best project management tool for a small team?" or "Which online casino in Finland pays out fastest?"'],
     ['AI gives a shortlist', 'Instead of ten blue links, the assistant names a few brands and explains why, often quoting review sites and forums.'],
-    ['You are in it, or not', 'If AI leaves you out, or describes you wrongly, you lose that player before they ever reach your site.'],
+    ['You are in it, or not', 'If AI leaves you out, or describes you wrongly, you lose that customer before they ever reach your site.'],
   ];
   return (
     <Section className="pb-28">
-      <Heading eyebrow="Why it matters" title="The new front page is an AI answer." sub="More and more people ask an AI assistant instead of searching. In iGaming, those answers decide which brands players even consider." />
+      <Heading eyebrow="Why it matters" title="The new front page is an AI answer." sub="More and more people ask an AI assistant instead of searching. Those answers decide which brands customers even consider." />
       <div className="grid gap-4 md:grid-cols-3">
         {steps.map(([t, d], i) => (
           <Reveal key={t} delay={i * 0.1} className="card p-7">
@@ -217,7 +217,7 @@ function Shift() {
 
 function Features() {
   const items = [
-    { icon: Eye, t: 'Visibility', d: 'How often AI mentions your brand when players ask about your category, per market and per AI assistant.', c: '#0a84ff' },
+    { icon: Eye, t: 'Visibility', d: 'How often AI mentions your brand when customers ask about your category, per market and per AI assistant.', c: '#0a84ff' },
     { icon: Trophy, t: 'Position & share of voice', d: 'Whether you are named first or last, and your share of all brand mentions compared with each competitor.', c: '#bf5af2' },
     { icon: Smile, t: 'Sentiment', d: 'The tone AI uses when it talks about you. Spot negative descriptions early.', c: '#30d158' },
     { icon: Link2, t: 'Sources AI trusts', d: 'Which review sites, forums, news and regulators AI quotes, so you know where to show up.', c: '#ff9f0a' },
@@ -253,7 +253,7 @@ function Features() {
 function HowItWorks() {
   const steps = [
     ['Discovery call', 'We learn your brand, markets and main competitors.'],
-    ['Setup', 'We pick the questions real players ask in each market and language.'],
+    ['Setup', 'We pick the questions real customers ask in each market and language.'],
     ['First report', 'You see where you stand today against your competitors, in every AI assistant.'],
     ['Actions', 'You get a prioritised list of honest improvements, each with its evidence.'],
     ['Ongoing tracking', 'Answers are re-checked on schedule, and a monthly report shows what changed.'],
@@ -281,16 +281,16 @@ function HowItWorks() {
   );
 }
 
-function ForIgaming() {
+function Industries() {
   const who = [
-    [Building2, 'Operators', 'Casino and sportsbook brands that want to be recommended in each market.'],
-    [Layers, 'Platforms', 'B2B platform providers that want to be named when operators ask for a supplier.'],
-    [Gamepad2, 'Game studios', 'Studios that want their games and brand mentioned by AI.'],
+    [Building2, 'Consumer brands', 'Shops, apps and services that want to be recommended when people ask AI what to buy or use.'],
+    [Layers, 'B2B & software', 'Companies that want to be on the shortlist when buyers ask AI for a supplier or tool.'],
+    [Gamepad2, 'iGaming (our specialty)', 'Operators, platforms and game studios, with ready-made questions per market and advice that respects gambling advertising rules.'],
   ];
   const markets = [['🇫🇮', 'Finland'], ['🇸🇪', 'Sweden'], ['🇬🇧', 'United Kingdom'], ['🇩🇪', 'Germany'], ['🌍', 'Global']];
   return (
-    <Section id="igaming" className="py-28">
-      <Heading eyebrow="Built for iGaming" title="Made for how your industry works." sub="Ready-made questions for each market, local languages, and advice that respects gambling advertising rules." />
+    <Section id="industries" className="py-28">
+      <Heading eyebrow="Who it's for" title="Made for how your industry works." sub="Questions written the way your customers ask, in their market and language, with advice that respects the advertising rules of your industry." />
       <div className="grid gap-4 md:grid-cols-3">
         {who.map(([I, t, d], i) => (
           <Reveal key={t} delay={i * 0.08} className="card p-7">
@@ -303,14 +303,14 @@ function ForIgaming() {
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <Reveal className="card p-7">
           <div className="flex items-center gap-2 text-[19px] font-semibold tracking-title"><Globe2 size={20} className="text-accent" />Markets</div>
-          <p className="mt-2 text-[15px] text-ink2">Questions are asked as a player in that country would ask them, in their language.</p>
+          <p className="mt-2 text-[15px] text-ink2">Questions are asked as a customer in that country would ask them, in their language.</p>
           <div className="mt-5 flex flex-wrap gap-2">{markets.map(([f, m]) => <span key={m} className="chip text-[13px]"><span aria-hidden>{f}</span>{m}</span>)}</div>
           <p className="mt-3 text-xs text-muted">Other markets on request.</p>
         </Reveal>
         <Reveal className="card p-7" delay={0.08}>
           <div className="flex items-center gap-2 text-[19px] font-semibold tracking-title"><ShieldCheck size={20} className="text-accent" />We measure. We never manipulate.</div>
           <ul className="mt-4 grid gap-2.5 text-[15px] text-ink2">
-            {['Answers come only through the AI companies’ official APIs, never by scraping.', 'No fake reviews, fake posts or tricks to game AI answers.', 'Recommendations follow gambling advertising rules in each market.', 'No promises of rankings: nobody can guarantee what an AI will say.'].map(t => (
+            {['Answers come only through the AI companies’ official APIs, never by scraping.', 'No fake reviews, fake posts or tricks to game AI answers.', 'Recommendations follow the advertising rules of your industry and market.', 'No promises of rankings: nobody can guarantee what an AI will say.'].map(t => (
               <li key={t} className="flex gap-2.5"><Check size={17} className="mt-0.5 shrink-0" style={{ color: '#30d158' }} />{t}</li>
             ))}
           </ul>
@@ -325,7 +325,7 @@ function Faq() {
     ['What is "AI visibility"?', 'It is how often, how prominently and how positively AI assistants mention your brand when people ask questions about your category. Think of it as search rankings for AI answers.'],
     ['Which AI assistants do you track?', 'ChatGPT, Gemini, Perplexity and Claude, through each company’s official API, with web search switched on so answers reflect current information.'],
     ['What about Google AI Overviews and Microsoft Copilot?', 'They have no official way to collect their answers. The only way would be scraping, which breaks their terms, so we don’t track them. We would rather tell you than fake it.'],
-    ['Are these the exact answers a player sees?', 'They come from the same AI models, asked the same way, but an individual’s app can personalise answers. That is why we track many questions over time and look at trends, not single answers.'],
+    ['Are these the exact answers a customer sees?', 'They come from the same AI models, asked the same way, but an individual’s app can personalise answers. That is why we track many questions over time and look at trends, not single answers.'],
     ['Can you guarantee we will rank higher?', 'No, and you should be careful with anyone who does. We show you where you stand and what honest actions are most likely to help, then measure whether things change.'],
     ['Which markets and languages?', 'Finland, Sweden, the United Kingdom, Germany and global English out of the box. Other markets can be added.'],
     ['How do we get started?', 'Send the form below. We’ll set up a call to understand your brand and competitors, then run a first check.'],
@@ -392,7 +392,7 @@ function Contact() {
                   <div><label className="label" htmlFor="c-role">You are</label>
                     <select id="c-role" className="input" value={f.role} onChange={set('role')}>
                       <option value="">Choose…</option>
-                      {['Operator', 'Platform', 'Game studio', 'Affiliate', 'Agency', 'Other'].map(r => <option key={r}>{r}</option>)}
+                      {['Brand / company', 'Agency', 'iGaming operator', 'iGaming supplier', 'Other'].map(r => <option key={r}>{r}</option>)}
                     </select></div>
                 </div>
                 <div><label className="label" htmlFor="c-markets">Markets you care about</label><input id="c-markets" className="input" placeholder="e.g. Finland, Sweden" value={f.markets} onChange={set('markets')} /></div>

@@ -32,7 +32,7 @@ export default function Actions() {
       <div className="mb-3"><SimBanner show={project.data_mode !== 'live'} /></div>
       <div className="mb-4 flex items-start gap-2 rounded-lg border border-line bg-surface px-3 py-2 text-xs text-ink2">
         <Info size={14} className="mt-0.5 shrink-0 text-muted" />
-        <span>These are suggestions, not promises. Nobody can guarantee how an AI will answer. Only take honest actions: correct facts, real news, real content. Never fake reviews or posts, and follow gambling advertising rules in each market.</span>
+        <span>These are suggestions, not promises. Nobody can guarantee how an AI will answer. Only take honest actions: correct facts, real news, real content. Never fake reviews or posts, and follow the advertising rules of your industry and market (for example gambling, financial or health advertising rules).</span>
       </div>
       <div className="mb-4">
         <Segmented value={show} onChange={setShow} options={[

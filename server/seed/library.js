@@ -54,7 +54,8 @@ export const BRAND_LIBRARY = [
 ];
 
 export const CATEGORIES = {
-  operator: 'Operator',
+  business: 'Any business',
+  operator: 'iGaming operator',
   platform: 'Platform / aggregator',
   studio: 'Game studio',
 };
@@ -116,4 +117,17 @@ export const PROMPT_LIBRARY = [
   { c: 'studio', country: 'GLOBAL', language: 'en', topic: 'Live casino', text: 'Which live casino provider is the best?' },
   { c: 'studio', country: 'GLOBAL', language: 'en', topic: 'Innovation', text: 'Which slot studios are the most innovative right now?' },
   { c: 'studio', country: 'GLOBAL', language: 'en', topic: 'Buying guide', text: 'Which game providers should a new online casino integrate first?' },
+];
+
+// Starter questions for any other business. The setup wizard fills in {offer} (what the client sells,
+// in the customer's words), {brand} and {where} (the market), so they read like real customer questions.
+export const GENERAL_PROMPTS = [
+  { topic: 'Best options', t: 'What are the best {offer}{where}?' },
+  { topic: 'Best options', t: 'Which {offer} would you recommend{where}, and why?' },
+  { topic: 'Trust', t: 'What are the most trusted {offer}{where}?' },
+  { topic: 'Price', t: 'What are the most affordable {offer}{where}?' },
+  { topic: 'Buying guide', t: 'What should I look for when choosing {offer}?' },
+  { topic: 'Comparison', t: 'What are the best alternatives to {brand}?', brand: true },
+  { topic: 'Reputation', t: 'Is {brand} any good? What do customers say about it?', brand: true },
+  { topic: 'Reputation', t: 'What are the pros and cons of {brand}?', brand: true },
 ];

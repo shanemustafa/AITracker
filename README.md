@@ -2,7 +2,7 @@
 
 *Give your brand the house edge in AI answers.*
 
-Tracks how AI assistants (ChatGPT, Gemini, Perplexity, Claude) talk about iGaming brands. Think "Google Analytics, but for what AI says about a brand".
+Tracks how AI assistants (ChatGPT, Gemini, Perplexity, Claude) talk about brands, for any business, with a specialty in iGaming. Think "Google Analytics, but for what AI says about a brand".
 
 It **measures and advises**. It never tries to change what AI models say, never posts reviews, and never promises better rankings. It asks real questions through official APIs and records the answers.
 
@@ -11,7 +11,7 @@ It **measures and advises**. It never tries to change what AI models say, never 
 - **Guided setup**: discovery → brand → competitors → questions → engines → first run, with results in minutes.
 - **Headline numbers** per brand: Visibility (% of answers that mention it), Position (average rank, 1 = first), Sentiment (0–100 tone), Share of voice — each with change vs the previous period.
 - **Charts**: trends, share of voice over time, competitor ranking, visibility-vs-sentiment map, per-engine and per-country comparison.
-- **Questions**: 40 pre-written iGaming questions (Finland first, plus Sweden, UK, Germany, global), bulk add, tags, topics, country, language, pause, delete.
+- **Questions**: general starter questions for any business (written from what the client offers), plus 40 pre-written iGaming questions (Finland first, plus Sweden, UK, Germany, global), bulk add, tags, topics, country, language, pause, delete.
 - **Competitor suggestions**: brands the AI keeps naming that you don't track yet, added with one click (history is recounted).
 - **Sources**: which websites the AI cites, grouped by type (review sites, forums, news, regulators, your site, competitor sites).
 - **Chats**: the real answers, with brands highlighted.

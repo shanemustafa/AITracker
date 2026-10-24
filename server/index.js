@@ -7,7 +7,7 @@ import { all, get, run, getSetting, setSetting, parseJSON, backup, tx } from './
 import { authRoutes, requireAuth, requireAdmin, apiToken, newToken, clearExpiredSessions } from './auth.js';
 import { startupCheck, redact } from './config.js';
 import { securityHeaders, httpsOnly, sameOriginOnly, rateLimit, publicError, errorHandler, v, InputError } from './security.js';
-import { BRAND_LIBRARY, PROMPT_LIBRARY, CATEGORIES, COUNTRIES, LANGUAGES } from './seed/library.js';
+import { BRAND_LIBRARY, PROMPT_LIBRARY, GENERAL_PROMPTS, CATEGORIES, COUNTRIES, LANGUAGES } from './seed/library.js';
 import { seedDemo, seedDemoActivities, addBrand, addPrompt } from './seed/demo.js';
 import { runMigrations } from './migrations.js';
 import { ENGINES, SUPPORTED_ENGINES, estimateAnswerCost } from './engines/index.js';
@@ -100,7 +100,7 @@ app.delete('/api/enquiries/:id', requireAdmin, wrap(req => { run('DELETE FROM en
 app.get('/api/meta', wrap(() => ({
   engines: Object.values(ENGINES).map(e => ({ id: e.id, label: e.label, supported: e.supported, via: e.via, caveat: e.caveat, reason: e.reason, color: e.color })),
   categories: CATEGORIES, countries: COUNTRIES, languages: LANGUAGES, sourceTypes: SOURCE_TYPES,
-  brandLibrary: BRAND_LIBRARY.filter(b => b.featured), promptLibrary: PROMPT_LIBRARY, mode: mode(),
+  brandLibrary: BRAND_LIBRARY.filter(b => b.featured), promptLibrary: PROMPT_LIBRARY, generalPrompts: GENERAL_PROMPTS, mode: mode(),
 })));
 
 // ---------- Projects ----------
