@@ -55,7 +55,8 @@ let reserved = 0; // estimated cost of AI requests currently in flight, across a
 
 export function monthSpend() {
   const month = new Date().toISOString().slice(0, 7);
-  return get("SELECT COALESCE(SUM(cost), 0) s FROM answers WHERE simulated = 0 AND substr(created_at, 1, 7) = ?", month).s;
+  return get("SELECT COALESCE(SUM(cost), 0) s FROM answers WHERE simulated = 0 AND substr(created_at, 1, 7) = ?", month).s
+    + get("SELECT COALESCE(SUM(cost), 0) s FROM ai_spend WHERE substr(created_at, 1, 7) = ?", month).s;
 }
 export function spendByEngine() {
   const month = new Date().toISOString().slice(0, 7);
@@ -171,6 +172,13 @@ async function execute(runId, project, prompts, engines, simulated) {
   run("UPDATE runs SET status = ?, message = ?, finished_at = datetime('now') WHERE id = ?",
     failed && !done ? 'failed' : messages.length ? 'partial' : 'done', messages.join(' ') || null, runId);
   run("UPDATE projects SET last_run_at = datetime('now') WHERE id = ?", project.id);
+  // New real answers: check them against the client's confirmed facts (if any). Failures never break the run.
+  if (!simulated && done) {
+    try {
+      const { listFacts, checkFacts } = await import('./factcheck.js');
+      if (listFacts(project.id).length) await checkFacts(project.id);
+    } catch (e) { console.error('Fact check after run skipped:', redact(e?.message || e)); }
+  }
 }
 
 // ---- Daily schedule ----

@@ -85,7 +85,7 @@ export function Privacy() {
       <p>We use these service providers ("processors"). They may only use the data to provide their service to us.</p>
       <ul>
         <li><strong>Railway Corporation</strong> — hosting of the Service and its database. Servers are located in: <strong>{d?.hostingRegion || 'United States'}</strong>.</li>
-        <li><strong>OpenAI, Google, Perplexity and Anthropic</strong> — only when AI engines are switched on. They receive the tracked questions (about brands) and return answers. Account details are never sent to them.</li>
+        <li><strong>OpenAI, Google, Perplexity and Anthropic</strong> — only when AI engines are switched on. They receive the tracked questions (about brands) and return answers. If you use the fact check, Anthropic also receives the stored answers that mention the client together with the facts you entered, to compare them. Account details are never sent to them.</li>
       </ul>
       <p>Where data is processed outside the EU/EEA, the transfer is protected by the European Commission's Standard Contractual Clauses and/or the EU–US Data Privacy Framework, as offered by the provider.</p>
 
@@ -140,6 +140,8 @@ export function Terms() {
         <li>Act honestly on the results: no fake reviews, no posing as customers, no hidden paid placements, and no marketing to minors or vulnerable people.</li>
         <li>Do not put personal data into tracked questions, try to break or overload the Service, or access accounts that are not yours.</li>
         <li>Follow the terms of the AI providers whose engines you connect.</li>
+        <li>Only run the website check on websites you own or that the client has asked you to check. It reads a few public files (home page, robots.txt, sitemap.xml, llms.txt) and changes nothing.</li>
+        <li>Only enter facts in the fact check that the client has confirmed. Results are automated and can be wrong; review them before sharing.</li>
       </ul>
 
       <h2>5. AI providers and costs</h2>

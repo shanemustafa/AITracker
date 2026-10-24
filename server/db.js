@@ -91,6 +91,25 @@ CREATE TABLE IF NOT EXISTS enquiries (
   id INTEGER PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL, company TEXT, role TEXT, markets TEXT, message TEXT,
   status TEXT NOT NULL DEFAULT 'new', created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS site_checks (
+  id INTEGER PRIMARY KEY, project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  url TEXT NOT NULL, score INTEGER, results TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS project_facts (
+  id INTEGER PRIMARY KEY, project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  text TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS fact_findings (
+  answer_id INTEGER NOT NULL REFERENCES answers(id) ON DELETE CASCADE,
+  fact_id INTEGER NOT NULL REFERENCES project_facts(id) ON DELETE CASCADE,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  verdict TEXT NOT NULL, quote TEXT, explanation TEXT, checked_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (answer_id, fact_id)
+);
+-- Money spent on AI calls that are not answers themselves (e.g. fact checks), counted in the monthly cap.
+CREATE TABLE IF NOT EXISTS ai_spend (
+  id INTEGER PRIMARY KEY, project_id INTEGER, kind TEXT NOT NULL, cost REAL NOT NULL DEFAULT 0, created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 CREATE INDEX IF NOT EXISTS idx_activities_proj ON activities(project_id, done_at, due_at);
 CREATE INDEX IF NOT EXISTS idx_answers_proj_day ON answers(project_id, day);
 CREATE INDEX IF NOT EXISTS idx_answers_prompt ON answers(prompt_id);

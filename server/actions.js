@@ -1,6 +1,7 @@
 // Suggested actions: plain-English ideas, each backed by evidence from the tracked answers.
 // We only advise. Nothing here promises a ranking change.
-import { all } from './db.js';
+import { all, get, parseJSON } from './db.js';
+import { factReport } from './factcheck.js';
 import { sources, promptTable, summary, suggestions, answerFilter, brandsOf } from './metrics.js';
 import { ENGINES } from './engines/index.js';
 import { COUNTRIES } from './seed/library.js';
@@ -36,14 +37,43 @@ const SOURCE_ADVICE = {
   other: d => ({ title: `Look at ${d}`, steps: [`${d} is cited in answers where competitors appear but you do not. Check what it says and whether you belong there.`] }),
 };
 
+// Actions from the AI-readiness checks: website problems and AI answers that contradict confirmed facts.
+function readinessActions(projectId) {
+  const out = [];
+  const sc = get('SELECT * FROM site_checks WHERE project_id = ? ORDER BY id DESC LIMIT 1', projectId);
+  const res = sc ? parseJSON(sc.results, {}) : null;
+  for (const c of res?.checks || []) {
+    if (!['fail', 'warn'].includes(c.status) || !c.fix) continue;
+    out.push({
+      key: `site:${c.id}`, type: 'website', score: c.status === 'fail' ? 55 : 22,
+      title: `Website: ${c.label.charAt(0).toLowerCase() + c.label.slice(1)}`,
+      why: c.detail,
+      steps: [c.fix, 'Then run the website check again on the AI readiness page.'],
+      evidence: { stats: [`Website check ${String(sc.created_at).slice(0, 10)}`, `Readiness score ${sc.score}/100`] },
+    });
+  }
+  for (const fact of factReport(projectId).facts.filter(x => x.contradicts > 0)) {
+    out.push({
+      key: `fact:${fact.id}`, type: 'accuracy', score: Math.min(90, 60 + fact.contradicts * 5),
+      title: `Correct a wrong claim about you: "${fact.text}"`,
+      why: `${fact.contradicts} AI answer(s) say something that conflicts with this confirmed fact.`,
+      steps: ['Read the quotes below and check which sources the answers cite (Chats page).',
+        'Make the correct fact easy to find on your own website (about page, FAQ, structured data).',
+        'Ask the cited sites that repeat the wrong claim to correct it, with evidence. Never post anonymous corrections.'],
+      evidence: { stats: [`${fact.contradicts} contradicting answers`, `${fact.supports} answers get it right`], quotes: fact.wrong.map(w => ({ text: w.quote, engine: w.engine, day: w.day })) },
+    });
+  }
+  return out;
+}
+
 export function computeActions(projectId, f) {
   const brands = brandsOf(projectId);
   const own = brands.find(b => b.is_own);
   if (!own) return [];
-  const actions = [];
+  const actions = readinessActions(projectId);
   const sum = summary(projectId, f);
   const total = sum.totalAnswers;
-  if (!total) return [];
+  if (!total) return finalize(projectId, actions);
   const af = answerFilter(projectId, f);
   const ownStats = sum.brands.find(b => b.is_own);
   const competitors = sum.brands.filter(b => !b.is_own);
@@ -160,8 +190,12 @@ export function computeActions(projectId, f) {
     });
   }
 
+  return finalize(projectId, actions);
+}
+
+function finalize(projectId, actions) {
   // Keep the list short: the best few of each kind.
-  const LIMIT = { source: 6, content: 6, engine: 2, market: 3, reputation: 1, tracking: 3 };
+  const LIMIT = { source: 6, content: 6, engine: 2, market: 3, reputation: 1, tracking: 3, website: 5, accuracy: 5 };
   const used = {};
   actions.sort((a, b) => b.score - a.score);
   const short = actions.filter(a => (used[a.type] = (used[a.type] || 0) + 1) <= (LIMIT[a.type] || 3));

@@ -44,6 +44,7 @@ export function startupCheck({ env = process.env, exit = code => process.exit(co
     if (r.status === 'missing' && r.required) problems.push(`${r.name} is missing`);
   }
   const overrides = AI_ENDPOINT_OVERRIDES.filter(n => env[n]);
+  if (env.SITE_CHECK_ALLOW_PRIVATE && env.NODE_ENV === 'production') problems.push('SITE_CHECK_ALLOW_PRIVATE must not be set in production (it would let the website check reach internal addresses)');
   if (overrides.length && env.ALLOW_AI_ENDPOINT_OVERRIDE !== '1') problems.push(`${overrides.join(', ')} must not be set (they redirect AI traffic and API keys)`);
   log.log('Configuration check: ' + rows.map(r => `${r.name}=${r.status}`).join(', '));
   if (!problems.length) return { ok: true, rows };

@@ -5,7 +5,7 @@ import { Logo, PageIn, Skeleton } from './motion.jsx';
 import { Routes, Route, Navigate, NavLink, Outlet, useNavigate, useParams, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, MessageSquareText, Link2, Users, ListChecks, FileText, Settings, Plus, FolderKanban,
-  Sun, Moon, Monitor, LogOut, Inbox, Globe, Play, Loader2, Download, Route as RouteIcon, ClipboardList, Lightbulb, Menu, X,
+  Sun, Moon, Monitor, LogOut, Inbox, Globe, Play, Loader2, Download, Route as RouteIcon, ClipboardList, Lightbulb, Menu, X, ShieldCheck,
 } from 'lucide-react';
 import { api, useApi, setTheme, useDark, useFilters, fmtDate, PREVIEW } from './lib.js';
 import { Spinner, SimBadge, Badge, ErrorBox, useToast, Segmented } from './ui.jsx';
@@ -26,6 +26,7 @@ import ProjectSettings from './pages/ProjectSettings.jsx';
 import SettingsPage from './pages/Settings.jsx';
 import Home from './pages/Home.jsx';
 import Enquiries from './pages/Enquiries.jsx';
+import Readiness from './pages/Readiness.jsx';
 
 
 export default function App() {
@@ -72,6 +73,7 @@ function Authed({ user, bare, children }) {
                 <Route path="sources" element={<Sources />} />
                 <Route path="chats" element={<Chats />} />
                 <Route path="actions" element={<Actions />} />
+                <Route path="readiness" element={<Readiness />} />
                 <Route path="reports" element={<Reports />} />
                 <Route path="reports/:rid" element={<ReportView />} />
                 <Route path="settings" element={<ProjectSettings />} />
@@ -114,6 +116,7 @@ function Shell({ user }) {
     { to: `/p/${pid}/journey`, label: 'Client journey', icon: RouteIcon },
     { to: `/p/${pid}/overview`, label: 'Overview', icon: LayoutDashboard },
     { to: `/p/${pid}/actions`, label: 'Suggested actions', icon: Lightbulb },
+    { to: `/p/${pid}/readiness`, label: 'AI readiness', icon: ShieldCheck },
     { to: `/p/${pid}/reports`, label: 'Reports', icon: FileText },
     { to: `/p/${pid}/prompts`, label: 'Questions', icon: ListChecks },
     { to: `/p/${pid}/competitors`, label: 'Competitors', icon: Users },

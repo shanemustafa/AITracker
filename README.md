@@ -15,6 +15,7 @@ It **measures and advises**. It never tries to change what AI models say, never 
 - **Competitor suggestions**: brands the AI keeps naming that you don't track yet, added with one click (history is recounted).
 - **Sources**: which websites the AI cites, grouped by type (review sites, forums, news, regulators, your site, competitor sites).
 - **Chats**: the real answers, with brands highlighted.
+- **AI readiness**: a website check (can AI crawlers read the client's site: robots.txt rules for AI crawlers, structured data, text readable without JavaScript, sitemap, llms.txt) and a fact check (Claude compares real answers with facts the client confirmed and flags contradictions).
 - **Suggested actions**: prioritised, plain-English ideas, each with its evidence.
 - **Client journey**: six visible stages per project — Discovery, Setup, First run, First report, Recommendations, Ongoing tracking.
 - **Reports**: frozen snapshots ("reveal" report, then monthly progress reports), printable to PDF.

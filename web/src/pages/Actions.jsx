@@ -8,7 +8,7 @@ import FilterBar from './FilterBar.jsx';
 import { stagger } from '../motion.jsx';
 
 const PRI = { high: { label: 'High priority', tone: 'bad' }, medium: { label: 'Medium', tone: 'warn' }, low: { label: 'Low', tone: 'default' } };
-const TYPE = { source: 'Get mentioned', content: 'Content gap', engine: 'Engine gap', market: 'Market gap', reputation: 'Reputation', tracking: 'Tracking' };
+const TYPE = { source: 'Get mentioned', content: 'Content gap', engine: 'Engine gap', market: 'Market gap', reputation: 'Reputation', tracking: 'Tracking', website: 'Website', accuracy: 'Wrong facts' };
 
 export default function Actions() {
   const { project } = useProject();

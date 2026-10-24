@@ -267,3 +267,25 @@ test('secrets never appear in server logs', () => {
   assert.ok(!out.includes(SETUP), 'setup code leaked into logs');
   assert.match(out, /SETUP_CODE=set/);
 });
+
+// ---------- AI readiness routes ----------
+test('website check only works on the saved brand website, never a typed address', async () => {
+  const r = await admin.post(`/api/projects/${projectId}/site-check`, { url: 'http://169.254.169.254/' });
+  assert.equal(r.status, 400);
+  assert.match(r.json.error, /Add the client's website/);
+});
+
+test('facts: validation, demo projects refused, members can use it, visitors cannot', async () => {
+  const member = client();
+  assert.equal((await member.post('/api/auth/login', { email: MEMBER.email, password: 'Member-pass-456' })).status, 200);
+  assert.equal((await client().get(`/api/projects/${projectId}/facts`)).status, 401);
+  assert.equal((await member.post(`/api/projects/${projectId}/facts`, { text: '' })).status, 400);
+  assert.equal((await member.post(`/api/projects/${projectId}/facts`, { text: 'x'.repeat(301) })).status, 400);
+  const ok = await member.post(`/api/projects/${projectId}/facts`, { text: 'Test Brand is not a bank.' });
+  assert.equal(ok.status, 200);
+  const chk = await member.post(`/api/projects/${projectId}/facts/check`);
+  assert.equal(chk.status, 400);
+  assert.match(chk.json.error, /simulated/);
+  const del = await member.del(`/api/facts/${ok.json.facts[0].id}`);
+  assert.equal(del.status, 200);
+});

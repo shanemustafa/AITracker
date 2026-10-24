@@ -17,6 +17,8 @@ import * as M from './metrics.js';
 import { computeActions } from './actions.js';
 import { startRun, activeRun, reanalyzeProject, getProject, monthSpend, spendByEngine, startScheduler } from './runner.js';
 import { createReport, listReports, getReport, workflow } from './reports.js';
+import { runSiteCheck } from './sitecheck.js';
+import { checkFacts, factReport, MAX_FACTS } from './factcheck.js';
 
 // Stop here (in production) if a required secret is missing or an unsafe override is set.
 startupCheck();
@@ -72,7 +74,7 @@ const mode = () => getSetting('mode', 'demo');
 // ---------- Company & legal details (public, shown on the legal pages) ----------
 const COMPANY_FIELDS = ['name', 'businessId', 'vatId', 'address', 'country', 'email', 'phone', 'website', 'representative'];
 const company = () => ({ ...Object.fromEntries(COMPANY_FIELDS.map(k => [k, ''])), country: 'Finland', ...getSetting('company', {}) });
-app.get('/api/legal', wrap(() => ({ company: company(), updated: [getSetting('legal_updated', ''), '2026-10-20'].sort().pop(), hostingRegion: getSetting('hosting_region', 'United States') })));
+app.get('/api/legal', wrap(() => ({ company: company(), updated: [getSetting('legal_updated', ''), '2026-10-24'].sort().pop(), hostingRegion: getSetting('hosting_region', 'United States') })));
 
 // ---------- Website contact form ----------
 // Public: anyone can send an enquiry from the website. Limited per IP; a hidden "website" field catches bots.
@@ -252,6 +254,46 @@ app.post('/api/projects/:id/run', runLimit, wrap(req => {
 }));
 app.get('/api/projects/:id/runs', wrap(req => all('SELECT * FROM runs WHERE project_id = ? ORDER BY id DESC LIMIT 20', Number(req.params.id))));
 app.get('/api/runs/:id', wrap(req => get('SELECT * FROM runs WHERE id = ?', Number(req.params.id)) || (() => { throw notFound(); })()));
+
+// ---------- AI readiness: website check and fact check ----------
+const checkLimit = rateLimit({ windowMs: 60 * 60_000, max: 10, keyFn: perUser, message: 'Too many checks this hour. Please wait a little.' });
+const latestSiteCheck = id => {
+  const r = get('SELECT * FROM site_checks WHERE project_id = ? ORDER BY id DESC LIMIT 1', id);
+  return r ? { ...r, results: parseJSON(r.results, {}) } : null;
+};
+app.get('/api/projects/:id/site-check', wrap(req => {
+  const p = projectOr404(req.params.id);
+  const own = M.brandsOf(p.id).find(b => b.is_own);
+  return { domain: own?.domain || null, latest: latestSiteCheck(p.id) };
+}));
+// Only the website saved for the client's own brand can be checked: no free-typed addresses.
+app.post('/api/projects/:id/site-check', checkLimit, wrap(async req => {
+  const p = projectOr404(req.params.id);
+  const domain = M.brandsOf(p.id).find(b => b.is_own)?.domain;
+  if (!domain || !/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(domain)) throw new InputError("Add the client's website on the Competitors page first (e.g. example.com).");
+  const result = await runSiteCheck(`https://${domain}`);
+  run('INSERT INTO site_checks (project_id, url, score, results) VALUES (?,?,?,?)', p.id, result.url, result.score, JSON.stringify(result));
+  return latestSiteCheck(p.id);
+}));
+app.get('/api/projects/:id/facts', wrap(req => factReport(projectOr404(req.params.id).id)));
+app.post('/api/projects/:id/facts', wrap(req => {
+  const p = projectOr404(req.params.id);
+  const text = v.str(req.body.text, { max: 300, label: 'Fact', required: true });
+  if (get('SELECT COUNT(*) n FROM project_facts WHERE project_id = ?', p.id).n >= MAX_FACTS) throw new InputError(`A project can have at most ${MAX_FACTS} facts.`);
+  run('INSERT INTO project_facts (project_id, text) VALUES (?,?)', p.id, text);
+  return factReport(p.id);
+}));
+app.delete('/api/facts/:id', wrap(req => {
+  const f = get('SELECT * FROM project_facts WHERE id = ?', v.id(req.params.id)) || (() => { throw notFound(); })();
+  run('DELETE FROM project_facts WHERE id = ?', f.id);
+  return factReport(f.project_id);
+}));
+app.post('/api/projects/:id/facts/check', checkLimit, wrap(async req => {
+  const p = projectOr404(req.params.id);
+  if (p.data_mode !== 'live') throw new InputError('Fact checks run on real AI answers. This project uses simulated (demo) answers.');
+  const r = await checkFacts(p.id);
+  return { ...r, report: factReport(p.id) };
+}));
 
 // ---------- Brands & suggestions ----------
 app.post('/api/projects/:id/brands', wrap(req => {
